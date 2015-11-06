@@ -14,11 +14,11 @@ typedef Eigen::Transform<float, 3, Eigen::Affine> Transform;
 bool rotating = false;
 bool scaling = false;
 const double lim = 0.5;
-const double RadPerPixel = 0.001;
+const double RadPerPixel = 0.01;
 const double MovePerPixel = 0.001;
 int lastx; int lasty;
 
-vec3 dirVec(0, -3.5, -8);
+vec3 dirVec(1, 1, -1);
 //Viewing matrices
 mat4 VIEW;
 mat4 PROJ;
@@ -44,7 +44,7 @@ void RotateY(vec3 *dir, float rot)
 	znew += (*dir).x() * -sinPhi;
 	znew += (*dir).z() * cosPhi;
 
-//	(*dir).x() = xnew; (*dir).y() = ynew; (*dir).z() = znew;
+	(*dir).x() = xnew; (*dir).y() = ynew; (*dir).z() = znew;
 }
 
 void RotateZ(vec3 *dir, float rot)
@@ -64,51 +64,94 @@ void RotateZ(vec3 *dir, float rot)
 	(*dir).x() = xnew; (*dir).y() = ynew; (*dir).z() = znew;
 
 }
+void RotateX(vec3 *dir, float rot)
+{
+	double cosPhi = (double)cos(rot);
+	double sinPhi = (double)sin(rot);
+	//need to learn proper way to mult vec3 by matrix
+	float xnew = 0;
+	xnew += (*dir).x();
+	float ynew = 0;
+	ynew += (*dir).y() * cosPhi;
+	ynew += (*dir).z() * sinPhi;
+	float znew = 0;
+	znew += (*dir).y() * -sinPhi;
+	znew += (*dir).z() * cosPhi;
+
+	(*dir).x() = xnew; (*dir).y() = ynew; (*dir).z() = znew;
+
+}
 void CamRotate(int xnew, int ynew, int xold, int yold)
 {
 	float YRot = (xnew - xold) * RadPerPixel;
 	float ZRot = (ynew - yold) * RadPerPixel;
-
+	float XRot = (ynew- yold) * RadPerPixel;
 	RotateY(&dirVec, YRot);
-	RotateZ(&dirVec, ZRot);
+//	RotateZ(&dirVec, ZRot);
+	RotateX(&dirVec, XRot);
 	VIEW = Eigen::lookAt(dirVec, vec3(0, 0, 0), vec3(0, 1, 0));
+	lastx = xnew; lasty = ynew;
+}
+
+void CamZoom(int xnew, int ynew, int xold, int yold)
+{
+	float length = sqrt(dirVec.x() * dirVec.x() + dirVec.y() * dirVec.y());
+	float newLength = length + (ynew - yold) * MovePerPixel;
+	if (ynew > yold)
+	{
+		MODEL(0, 3) += 0.2;
+		MODEL(1, 3) += 0.2;
+		MODEL(2, 3) += 0.2;
+	}
+	else if (ynew < yold)
+	{
+		MODEL(0, 3) += -0.2;
+		MODEL(1, 3) += -0.2;
+		MODEL(2, 3) += -0.2;
+	}
+	lastx = xnew; lasty = ynew;
 }
 
 void mousemove(int x, int y)
 {
 	if (rotating)
-	{
 		CamRotate(x, y, lastx, lasty);
-	}
-
-
-
+	else if (scaling)
+		CamZoom(x, y, lastx, lasty);
 }
 
 void selection_button(int button, int action)
 {
+	//Left mouse button is for rotating
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 	{
 		if (!rotating)
 		{
 			rotating = true;
-
 			glfwGetMousePos(&lastx, &lasty);
-	//		mousemove();
-		}
-		
+		}	
 	}
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
-	{
 		rotating = false;
+	//right mouse button scales
+	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+	{
+		if (!scaling)
+		{
+			scaling = true;
+			glfwGetMousePos(&lastx, &lasty);
+		}
 	}
+	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
+		scaling = false;
 }
+
 void init(){
 
     glClearColor(0.5,0.5,0.5, /*solid*/1.0 );    
     glEnable(GL_DEPTH_TEST);
  //   mesh.init();
-	terrain.init(5,5);
+	terrain.init(128,128);
 
 	//setup viewing matrices;
 	MODEL = mat4::Identity();
@@ -133,6 +176,7 @@ void display(){
 	glUseProgram(pid);
 
 	terrain.draw();
+//	mesh.draw();
 }
 
 void cleanup(){}

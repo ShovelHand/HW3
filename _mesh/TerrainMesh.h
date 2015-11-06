@@ -30,11 +30,11 @@ void init(int width, int height)
 	glBindVertexArray(_vao);
 
 	//loops for vertices and indices go here
-	for (float j = float(height); j > 0.0; j -= 1)
+	for (float j = float(height); j > 0.0; j -= 1.0)
 	{
-		for (float i = float(width); i > 0.0; i -= 1)
+		for (float i = float(width); i > 0.0; i -= 1.0)
 		{
-			vertices.push_back(vec3(float(i) , float(j) , 0.0)); //once working in 3d, will probably transpose y and z
+			vertices.push_back(vec3(float(i), 0.0, float(j))); //once working in 3d, will probably transpose y and z
 
 		}
 	}
@@ -43,7 +43,7 @@ void init(int width, int height)
 	for (std::vector<vec3>::iterator itr = vertices.begin(); itr != vertices.end(); ++itr)
 	{
 		(*itr).x() -= 3.0;
-		(*itr).y() -= 3.0;
+		(*itr).z() -= 3.0;
 	}
 
 	//triangle strip
