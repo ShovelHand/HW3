@@ -10,21 +10,78 @@ TerrainMesh terrain;
 
 typedef Eigen::Transform<float, 3, Eigen::Affine> Transform;
 
+//mouse panning helpers
+bool rotating = false;
+bool scaling = false;
+const double lim = 0.5;
+const double RadPerPixel = 0.001;
+const double MovePerPixel = 0.001;
+int lastx; int lasty;
 
-bool mouseMove = false;
-
+vec3 dirVec(0, -3.5, -8);
 //Viewing matrices
 mat4 VIEW;
 mat4 PROJ;
 mat4 MODEL;
 
+void RotateY(vec3 *dir, float rot)
+{
+	float cosPhi = (float)cos(rot);
+	float sinPhi = (float)sin(rot);
+
+	//mat3 m;
+	//m(0) = (cosPhi, 0.0, sinPhi);
+	//m(1) = (0.0, 1.0, 0.0);
+	//m(2) = (-sinPhi, 0.0, cosPhi);
+	//big pedantic mess of assignments 'cause I can't use eigen properly.
+	float xnew = 0;
+	xnew += (*dir).x()*cosPhi;
+	xnew += (*dir).z() * sinPhi;
+	float ynew = 0;
+	ynew += (*dir).y() * 1;
+	ynew += (*dir).z() * sinPhi;
+	float znew = 0;
+	znew += (*dir).x() * -sinPhi;
+	znew += (*dir).z() * cosPhi;
+
+//	(*dir).x() = xnew; (*dir).y() = ynew; (*dir).z() = znew;
+}
+
+void RotateZ(vec3 *dir, float rot)
+{
+	double cosPhi = (double)cos(rot);
+	double sinPhi = (double)sin(rot);
+//need to learn proper way to mult vec3 by matrix
+	float xnew = 0;
+	xnew += (*dir).x()*cosPhi;
+	xnew += (*dir).y() * -sinPhi;
+	float ynew = 0;
+	ynew += (*dir).x() * sinPhi;
+	ynew += (*dir).y() * cosPhi;
+	float znew = 0;
+	znew += (*dir).z() * 1;
+
+	(*dir).x() = xnew; (*dir).y() = ynew; (*dir).z() = znew;
+
+}
+void CamRotate(int xnew, int ynew, int xold, int yold)
+{
+	float YRot = (xnew - xold) * RadPerPixel;
+	float ZRot = (ynew - yold) * RadPerPixel;
+
+	RotateY(&dirVec, YRot);
+	RotateZ(&dirVec, ZRot);
+	VIEW = Eigen::lookAt(dirVec, vec3(0, 0, 0), vec3(0, 1, 0));
+}
 
 void mousemove(int x, int y)
 {
-	if (!mouseMove)
-		return;
-	cout << "x = " << x << endl;
-	cout << "y = " << y << endl;
+	if (rotating)
+	{
+		CamRotate(x, y, lastx, lasty);
+	}
+
+
 
 }
 
@@ -32,26 +89,33 @@ void selection_button(int button, int action)
 {
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 	{
-		mouseMove = true;
-		int x = 0, y = 0;
-		glfwGetMousePos(&x, &y);
-		mousemove(x, y);
+		if (!rotating)
+		{
+			rotating = true;
+
+			glfwGetMousePos(&lastx, &lasty);
+	//		mousemove();
+		}
+		
 	}
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
 	{
-		mouseMove = false;
+		rotating = false;
 	}
 }
 void init(){
 
-    glClearColor(1,1,1, /*solid*/1.0 );    
+    glClearColor(0.5,0.5,0.5, /*solid*/1.0 );    
     glEnable(GL_DEPTH_TEST);
  //   mesh.init();
-	terrain.init(16,16);
+	terrain.init(5,5);
 
 	//setup viewing matrices;
-	float near = 0.25;  //near and far planes;
-	float far = 3.5;
+	MODEL = mat4::Identity();
+	VIEW = Eigen::lookAt(dirVec, vec3(0, 0, 0), vec3(0, 1, 0));
+	PROJ = Eigen::perspective(45.0f, window_width / (float)window_height, 0.1f, 10.0f);
+//	glFrustum(-1.0, 1.0, -1.0, 1.0, 5.0, 1500.0);
+
 
 }
 
@@ -59,8 +123,15 @@ void display(){
     opengp::update_title_fps("Assignment 3 and 4");   
     glViewport(0,0,window_width,window_height);    
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//	mesh.draw();
-	
+
+	//viewing matrices	
+	GLuint pid = terrain.getProgramID();
+	glUseProgram(pid);
+	glUniformMatrix4fv(glGetUniformLocation(pid, "MODEL"), 1, GL_FALSE, MODEL.data());
+	glUniformMatrix4fv(glGetUniformLocation(pid, "VIEW"), 1, GL_FALSE, VIEW.data());
+	glUniformMatrix4fv(glGetUniformLocation(pid, "PROJ"), 1, GL_FALSE, PROJ.data());
+	glUseProgram(pid);
+
 	terrain.draw();
 }
 

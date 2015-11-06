@@ -14,7 +14,9 @@ private:
 	std::vector<vec3> triangle_vec; //defines the order in which vertices are used in the triangle strips
 
 public:
-
+GLuint getProgramID(){
+	return _pid;
+}
 void init(int width, int height)
 {
 	//compile shaders
@@ -37,10 +39,11 @@ void init(int width, int height)
 		}
 	}
 
+	//will probably delete this, was just so that I wasn't looking at only one corner of terrain grid.
 	for (std::vector<vec3>::iterator itr = vertices.begin(); itr != vertices.end(); ++itr)
 	{
-		(*itr).x() -= 8.0;
-		(*itr).y() -= 8.0;
+		(*itr).x() -= 3.0;
+		(*itr).y() -= 3.0;
 	}
 
 	//triangle strip
@@ -104,16 +107,10 @@ void draw()
 
 	glEnable(GL_PROGRAM_POINT_SIZE);
 	glPointSize(5.0f);
-	glDrawArrays(GL_POINTS, 0, 2);
-//	glDrawArrays(GL_TRIANGLES, 0,  indices.size());
+//	glDrawArrays(GL_POINTS, 0, indices.size()); //uncomment to see a dot at each vertex
+//	glDrawArrays(GL_TRIANGLE_STRIP, 0, triangle_vec.size());  //uncomment to see the mesh drawn as triangle strips
 	
-	glDrawArraysInstanced(GL_LINE_LOOP, 0, triangle_vec.size(), 4);
-	/*
-	for (int i = 0; i < indices.size(); i++)
-	{
-		glDrawArraysInstanced(GL_LINE_LOOP, i, 3, indices.size());
-	}
-	*/
+	glDrawArraysInstanced(GL_LINE_LOOP, 0, triangle_vec.size(), 3);  //uncomment to see the mesh in wireframe
 
 	 glBindVertexArray(0);
 	 glUseProgram(0);

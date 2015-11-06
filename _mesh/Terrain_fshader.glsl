@@ -32,7 +32,7 @@ void main() {
         color += vec3(.5) * glossy; 
     }
         
-    // color = mix(R,G,fpoint[2]);
+     color = mix(R,G,fpoint[2]);
         
 //    int index = int( mod(gl_PrimitiveID,6) );
 //    color = COLORS[index];
