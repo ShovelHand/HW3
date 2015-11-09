@@ -23,6 +23,7 @@ void main() {
     float _theta = (3.14 - acos(p.y)) / 3.14;
     vec3 day = texture(tex_day, vec2(_phi,_theta)).rgb * lamb;
     vec3 night = texture(tex_night, vec2(_phi,_theta)).rgb;
+
     color = mix(night, day, max(lamb,0));
     
     if(lamb>0){
@@ -35,5 +36,5 @@ void main() {
      color = mix(R,G,fpoint[2]);
         
 //    int index = int( mod(gl_PrimitiveID,6) );
-//    color = COLORS[index];
+  //  color = vec3(0.6,0.6,0.6);
 }

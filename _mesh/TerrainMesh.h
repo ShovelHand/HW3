@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include "icg_common.h"
 
+#include "OpenGLImage/EigenVisualizer.h"
+using namespace EigenVisualizer;
 
 class TerrainMesh{
 private:
@@ -12,6 +14,24 @@ private:
 	
 	std::vector<vec3> vertices;
 	std::vector<vec3> triangle_vec; //defines the order in which vertices are used in the triangle strips
+	RGBImage* baseptr = NULL;
+	/*Perlin noise helper functions*/
+float mix(float x, float y, float alpha)
+{
+	return y * alpha + x * (1.0f - alpha);
+}
+
+float f(float t)
+{
+	float t_3 = t * t * t;
+	return 6 * t * t * t_3 - 15 * t * t_3 + 10 * t_3;
+}
+
+//return a random floating point number between [0, 1]
+float rand0_1()
+{
+	return ((float)std::rand()) / ((float)RAND_MAX);
+}
 
 public:
 GLuint getProgramID(){
@@ -28,16 +48,82 @@ void init(int width, int height)
 	///--- Vertex one vertex Array
 	glGenVertexArrays(1, &_vao);
 	glBindVertexArray(_vao);
+	
+	RGBImage base(width, height);
 
-	//loops for vertices and indices go here
-	for (float j = float(height); j > 0.0; j -= 1.0)
+	for (int i = 0; i < height; ++i)
 	{
-		for (float i = float(width); i > 0.0; i -= 1.0)
+		for (int j = 0; j < width; ++j)
 		{
-			vertices.push_back(vec3(float(i), 0.0, float(j))); //once working in 3d, will probably transpose y and z
-
+			base(i, j) = vec3(i / float(width), j / float(height), 0);
 		}
 	}
+
+	//set vertex heights using Perlin noise
+	int period = 4;
+	float frequency = 1.0f / period;
+	std::srand(1);
+	vec3 randGradientVec;
+
+	for (int i = 0; i < width; ++i)
+		for (int j = 0; j < height; ++j)
+		{
+			//we use vec3 instead of vec2 but set the last component to zero
+			randGradientVec.x() = cos(2 * M_PI * rand0_1());
+			randGradientVec.y() = sin(2 * M_PI * rand0_1());
+			randGradientVec.z() = 0;
+			base(i, j) = randGradientVec;
+		}
+
+	for (int i = 0; i < height; ++i)
+		for (int j = 0; j < width; ++j)
+		{
+			int left = (i / period) * period;
+			int right = (left + period) % width;
+			float dx = (i - left) * frequency;
+
+			int top = (j / period) * period;
+			int bottom = (top + period) % height;
+			float dy = (j - top) * frequency;
+
+			vec2 a(dx, -dy);
+			vec2 b(dx - 1, -dy);
+			vec2 c(dx - 1, 1 - dy);
+			vec2 d(dx, 1 - dy);
+
+
+			vec3 topleft = base(left, top);
+			float s = topleft(0) * a(0) + topleft(1) * a(1);
+			vec3 topright = base(right, top);
+			float t = topright(0) * b(0) + topright(1) * b(1);
+			vec3 bottomleft = base(left, bottom);
+			float u = bottomleft(0) * d(0) + bottomleft(1) * d(1);
+			vec3 bottomright = base(right, bottom);
+			float v = bottomright(0) * c(0) + bottomright(1) * c(1);
+
+			float fx = f(dx);
+			float fy = f(dy);
+
+			float st = mix(s, t, fx);
+			float uv = mix(u, v, fx);
+			float noise = mix(st, uv, fy);
+
+			base(i, j) = vec3(noise, noise, noise);
+
+			vertices.push_back(vec3(float(i), noise, float(j))); //once working in 3d, will probably transpose y and z
+		}
+//	showImage(image);
+	//loops for vertices and indices go here
+	//for (float j = float(height); j > 0.0; j -= 1.0)
+	//{
+	//	for (float i = float(width); i > 0.0; i -= 1.0)
+	//	{
+	//		if (int(i) % 2 == 0 && int(j) %2 == 0)
+	//			vertices.push_back(vec3(float(i), 0.0, float(j))); 
+	//		else 
+	//			vertices.push_back(vec3(float(i), 0.5, float(j))); //once working in 3d, will probably transpose y and z
+	//	}
+	//}
 
 	//will probably delete this, was just so that I wasn't looking at only one corner of terrain grid.
 	for (std::vector<vec3>::iterator itr = vertices.begin(); itr != vertices.end(); ++itr)
@@ -84,6 +170,12 @@ void init(int width, int height)
 
 
 	///--- Load texture
+	glGenTextures(1, &_tex);
+	glBindTexture(GL_TEXTURE_2D, _tex);
+	glfwLoadTexture2D("_mesh/day.tga", 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glUniform1i(glGetUniformLocation(_pid, "tex"), 0 /*GL_TEXTURE0*/);
 
 
 	///--- to avoid the current object being polluted
@@ -98,22 +190,24 @@ void cleanup()
 
 void draw()
 {
+
 	glUseProgram(_pid);
 	glBindVertexArray(_vao);
 
 	///--- Bind textures
-	//     glActiveTexture(GL_TEXTURE0);
-	//     glBindTexture(GL_TEXTURE_2D, _tex);
+	     glActiveTexture(GL_TEXTURE0);
+	     glBindTexture(GL_TEXTURE_2D, _tex);
 
 	glEnable(GL_PROGRAM_POINT_SIZE);
 	glPointSize(5.0f);
-//	glDrawArrays(GL_POINTS, 0, indices.size()); //uncomment to see a dot at each vertex
-//	glDrawArrays(GL_TRIANGLE_STRIP, 0, triangle_vec.size());  //uncomment to see the mesh drawn as triangle strips
+//	glDrawArrays(GL_POINTS, 0, vertices.size()); //uncomment to see a dot at each vertex
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, triangle_vec.size());  //uncomment to see the mesh drawn as triangle strips
 	
-	glDrawArraysInstanced(GL_LINE_LOOP, 0, triangle_vec.size(), 3);  //uncomment to see the mesh in wireframe
+//	glDrawArraysInstanced(GL_LINE_LOOP, 0, triangle_vec.size(), 3);  //uncomment to see the mesh in wireframe
 
 	 glBindVertexArray(0);
 	 glUseProgram(0);
+
 
 }
 };

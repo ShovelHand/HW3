@@ -151,7 +151,7 @@ void init(){
     glClearColor(0.5,0.5,0.5, /*solid*/1.0 );    
     glEnable(GL_DEPTH_TEST);
  //   mesh.init();
-	terrain.init(128,128);
+	terrain.init(256,256);
 
 	//setup viewing matrices;
 	MODEL = mat4::Identity();
