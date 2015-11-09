@@ -11,6 +11,10 @@ private:
 	GLuint _vbo_vpointTerrain; ///< memory buffer
 	GLuint _vbo_vtexcoord; ///< memory buffer
 	GLuint _tex; ///< Texture ID
+
+	opengp::Surface_mesh mesh;
+//	GLuint _vpoint;    ///< memory buffer
+	GLuint _vnormal;   ///< memory buffer
 	
 	std::vector<vec3> vertices;
 	std::vector<vec3> triangle_vec; //defines the order in which vertices are used in the triangle strips
@@ -153,12 +157,13 @@ void init(int width, int height)
 
 		}
 	}
-	
+
 	///--- Buffer
 	glGenBuffers(1, &_vbo_vpointTerrain);
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo_vpointTerrain);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vec3)*triangle_vec.size(), &triangle_vec[0], GL_STATIC_DRAW);
 
+	///--- Normal Buffer
 
 	///--- Attribute
 	GLuint vpoint_id = glGetAttribLocation(_pid, "vpoint");
@@ -172,7 +177,7 @@ void init(int width, int height)
 	///--- Load texture
 	glGenTextures(1, &_tex);
 	glBindTexture(GL_TEXTURE_2D, _tex);
-	glfwLoadTexture2D("_mesh/day.tga", 0);
+	glfwLoadTexture2D("_mesh/plain.tga", 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glUniform1i(glGetUniformLocation(_pid, "tex"), 0 /*GL_TEXTURE0*/);
@@ -191,8 +196,9 @@ void cleanup()
 void draw()
 {
 
-	glUseProgram(_pid);
-	glBindVertexArray(_vao);
+	//glUseProgram(_pid);
+	//glBindVertexArray(_vao);
+	bindShader();
 
 	///--- Bind textures
 	     glActiveTexture(GL_TEXTURE0);
@@ -205,9 +211,44 @@ void draw()
 	
 //	glDrawArraysInstanced(GL_LINE_LOOP, 0, triangle_vec.size(), 3);  //uncomment to see the mesh in wireframe
 
-	 glBindVertexArray(0);
-	 glUseProgram(0);
+	 unbindShader();
 
 
 }
+private:
+	void bindShader() {
+		glUseProgram(_pid);
+		glBindVertexArray(_vao);
+		check_error_gl();
+
+		/////--- Vertex Attribute ID for Positions
+		GLint vpoint_id = glGetAttribLocation(_pid, "_vbo_vpointTerrain");
+		if (vpoint_id >= 0) {
+			glEnableVertexAttribArray(vpoint_id);
+			check_error_gl();
+			glBindBuffer(GL_ARRAY_BUFFER, _vbo_vpointTerrain);
+			glVertexAttribPointer(vpoint_id, 3 /*vec3*/, GL_FLOAT, DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
+			check_error_gl();
+		}
+
+		/////--- Vertex Attribute ID for Normals
+		GLint vnormal_id = glGetAttribLocation(_pid, "vnormal");
+		if (vnormal_id >= 0) {
+			glEnableVertexAttribArray(vnormal_id);
+			glBindBuffer(GL_ARRAY_BUFFER, _vnormal);
+			glVertexAttribPointer(vnormal_id, 3 /*vec3*/, GL_FLOAT, DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
+			check_error_gl();
+		}
+	}
+
+	void unbindShader() {
+		GLint vpoint_id = glGetAttribLocation(_pid, "_vbo_vpointTerrain");
+		if (vpoint_id >= 0)
+			glDisableVertexAttribArray(vpoint_id);
+		GLint vnormal_id = glGetAttribLocation(_pid, "vnormal");
+		if (vnormal_id >= 0)
+			glDisableVertexAttribArray(vnormal_id);
+		glUseProgram(0);
+		glBindVertexArray(0);
+	}
 };

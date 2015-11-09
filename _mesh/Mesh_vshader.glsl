@@ -6,6 +6,11 @@ in vec3 vnormal;
 out vec3 fpoint; ///< for debug
 out vec3 fnormal_cam;
 
+///--- Uploaded by Eigen in C++
+uniform mat4 MODEL;
+uniform mat4 VIEW;
+uniform mat4 PROJ;
+
 /// helper function
 mat4 T(float x, float y, float z){ 
     mat4 _T = mat4(1);  
@@ -50,14 +55,7 @@ mat4 VIEW = mat4(1);
 mat4 PROJ = mat4(1);
 
 void main() {
-    // VIEW = lookat( 2*vec3(cos(time),0,sin(time)), vec3(0,0,0), vec3(0,1,0));
-    VIEW = lookat( vec3(0,0,-2), vec3(0,0,0), vec3(0,1,0));
-    MODEL = mat4(1);
-    float near = 0.25;
-    float far = 3.5;
-    PROJ = ortho(-.5,+.5, -.5,+.5, near,far) * persp(near, far);
-    
-    fpoint = vpoint + .5; ///< For Debug [0,1]^3 
+  fpoint = vpoint + .5; ///< For coloring Debug [0,1]^3 
     fnormal_cam = inverse( transpose( mat3(VIEW * MODEL) )) * vnormal; 
     gl_Position = PROJ * VIEW * MODEL * vec4(vpoint, 1.0);
 }

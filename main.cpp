@@ -150,16 +150,13 @@ void init(){
 
     glClearColor(0.5,0.5,0.5, /*solid*/1.0 );    
     glEnable(GL_DEPTH_TEST);
- //   mesh.init();
+//    mesh.init();
 	terrain.init(256,256);
 
 	//setup viewing matrices;
 	MODEL = mat4::Identity();
 	VIEW = Eigen::lookAt(dirVec, vec3(0, 0, 0), vec3(0, 1, 0));
 	PROJ = Eigen::perspective(45.0f, window_width / (float)window_height, 0.1f, 10.0f);
-//	glFrustum(-1.0, 1.0, -1.0, 1.0, 5.0, 1500.0);
-
-
 }
 
 void display(){
