@@ -18,7 +18,7 @@ private:
 	
 	std::vector<vec3> vertices;
 	std::vector<vec3> triangle_vec; //defines the order in which vertices are used in the triangle strips
-	RGBImage* baseptr = NULL;
+
 	/*Perlin noise helper functions*/
 float mix(float x, float y, float alpha)
 {
