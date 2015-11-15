@@ -5,6 +5,8 @@ in vec3 vnormal;
 
 out vec3 fpoint; ///< for debug
 out vec3 fnormal_cam;
+out float vheight; ///< for debug coloring
+
 
 ///--- Uploaded by Eigen in C++
 uniform mat4 MODEL;
@@ -14,5 +16,9 @@ uniform mat4 PROJ;
 void main() {          
     fpoint = vpoint + .5; ///< For coloring Debug [0,1]^3 
     fnormal_cam = inverse( transpose( mat3(VIEW * MODEL) )) * vnormal; 
+
+	vheight = vpoint.y*7;
+
     gl_Position = PROJ * VIEW * MODEL * vec4(vpoint, 1.0);
+
 }

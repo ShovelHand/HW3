@@ -10,10 +10,10 @@ private:
 	GLuint _pid; ///< GLSL shader program ID 
 	GLuint _vbo_vpointTerrain; ///< memory buffer
 	GLuint _vbo_vtexcoord; ///< memory buffer
-	GLuint _tex; ///< Texture ID
+	GLuint _tex_day; ///< Texture ID
+	GLuint _tex_night; ///< Texture ID
 
 	opengp::Surface_mesh mesh;
-//	GLuint _vpoint;    ///< memory buffer
 	GLuint _vnormal;   ///< memory buffer
 	
 	std::vector<vec3> vertices;
@@ -36,23 +36,8 @@ float rand0_1()
 {
 	return ((float)std::rand()) / ((float)RAND_MAX);
 }
-
-public:
-GLuint getProgramID(){
-	return _pid;
-}
-void init(int width, int height)
+void buildMeshVertices(int width, int height)
 {
-	//compile shaders
-	_pid = opengp::load_shaders("C:/icg/lecture_viewing3d/_mesh/Terrain_vshader.glsl",
-		"C:/icg/lecture_viewing3d/_mesh/Terrain_fshader.glsl");
-	if (!_pid) exit(EXIT_FAILURE);
-	glUseProgram(_pid);
-
-	///--- Vertex one vertex Array
-	glGenVertexArrays(1, &_vao);
-	glBindVertexArray(_vao);
-	
 	RGBImage base(width, height);
 
 	for (int i = 0; i < height; ++i)
@@ -78,7 +63,7 @@ void init(int width, int height)
 			randGradientVec.z() = 0;
 			base(i, j) = randGradientVec;
 		}
-
+	//set terrain mesh vertices
 	for (int i = 0; i < height; ++i)
 		for (int j = 0; j < width; ++j)
 		{
@@ -116,20 +101,8 @@ void init(int width, int height)
 
 			vertices.push_back(vec3(float(i), noise, float(j))); //once working in 3d, will probably transpose y and z
 		}
-//	showImage(image);
-	//loops for vertices and indices go here
-	//for (float j = float(height); j > 0.0; j -= 1.0)
-	//{
-	//	for (float i = float(width); i > 0.0; i -= 1.0)
-	//	{
-	//		if (int(i) % 2 == 0 && int(j) %2 == 0)
-	//			vertices.push_back(vec3(float(i), 0.0, float(j))); 
-	//		else 
-	//			vertices.push_back(vec3(float(i), 0.5, float(j))); //once working in 3d, will probably transpose y and z
-	//	}
-	//}
+	//	showImage(image);
 
-	//will probably delete this, was just so that I wasn't looking at only one corner of terrain grid.
 	for (std::vector<vec3>::iterator itr = vertices.begin(); itr != vertices.end(); ++itr)
 	{
 		(*itr).x() -= 3.0;
@@ -137,7 +110,7 @@ void init(int width, int height)
 	}
 
 	//triangle strip
-	for	(int j = 0; j < (height - 1); ++j)
+	for (int j = 0; j < (height - 1); ++j)
 	{
 		//sqaures inside a triangle strip
 		for (int i = 0; i < (width - 1); ++i)
@@ -157,6 +130,25 @@ void init(int width, int height)
 
 		}
 	}
+}
+public:
+GLuint getProgramID(){
+	return _pid;
+}
+
+void init(int width, int height)
+{
+	//compile shaders
+	_pid = opengp::load_shaders("C:/icg/lecture_viewing3d/_mesh/Terrain_vshader.glsl",
+		"C:/icg/lecture_viewing3d/_mesh/Terrain_fshader.glsl");
+	if (!_pid) exit(EXIT_FAILURE);
+	glUseProgram(_pid);
+
+	///--- Vertex one vertex Array
+	glGenVertexArrays(1, &_vao);
+	glBindVertexArray(_vao);
+	
+	buildMeshVertices(width, height);
 
 	///--- Buffer
 	glGenBuffers(1, &_vbo_vpointTerrain);
@@ -172,15 +164,23 @@ void init(int width, int height)
 
 
 	///--- Texture coordinates
-
+	
 
 	///--- Load texture
-	glGenTextures(1, &_tex);
-	glBindTexture(GL_TEXTURE_2D, _tex);
-	glfwLoadTexture2D("_mesh/plain.tga", 0);
+	glGenTextures(1, &_tex_day);
+	glBindTexture(GL_TEXTURE_2D, _tex_day);
+	glfwLoadTexture2D("_mesh/plane.tga", 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glUniform1i(glGetUniformLocation(_pid, "tex"), 0 /*GL_TEXTURE0*/);
+	glUniform1i(glGetUniformLocation(_pid, "tex_day"), 0 /*GL_TEXTURE0*/);
+
+	///--- Load texture
+	glGenTextures(1, &_tex_night);
+	glBindTexture(GL_TEXTURE_2D, _tex_night);
+	glfwLoadTexture2D("_mesh/night.tga", 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glUniform1i(glGetUniformLocation(_pid, "tex_night"), 1 /*GL_TEXTURE1*/);
 
 
 	///--- to avoid the current object being polluted
@@ -190,33 +190,35 @@ void init(int width, int height)
 
 void cleanup()
 {
-	
+	glBindVertexArray(0);
+	glUseProgram(0);
+	glDeleteBuffers(1, &_vbo_vpointTerrain);
+	glDeleteBuffers(1, &_vbo_vtexcoord);
+	glDeleteProgram(_pid);
+	glDeleteVertexArrays(1, &_vao);
+//	glDeleteTextures(1, &_tex);
 }
 
 void draw()
 {
-
-	//glUseProgram(_pid);
-	//glBindVertexArray(_vao);
 	bindShader();
-
 	///--- Bind textures
-	     glActiveTexture(GL_TEXTURE0);
-	     glBindTexture(GL_TEXTURE_2D, _tex);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, _tex_day);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, _tex_night);
 
-	glEnable(GL_PROGRAM_POINT_SIZE);
-	glPointSize(5.0f);
-//	glDrawArrays(GL_POINTS, 0, vertices.size()); //uncomment to see a dot at each vertex
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, triangle_vec.size());  //uncomment to see the mesh drawn as triangle strips
+	glUniform1f(glGetUniformLocation(_pid, "time"), glfwGetTime());
+
+	glDrawArrays(GL_TRIANGLES, 0, triangle_vec.size());  //uncomment to see the mesh drawn as triangle strips
 	
-//	glDrawArraysInstanced(GL_LINE_LOOP, 0, triangle_vec.size(), 3);  //uncomment to see the mesh in wireframe
+//	glDrawArraysInstanced(GL_LINE_LOOP, 0, triangle_vec.size() -1, 3);  //uncomment to see the mesh in wireframe
 
 	 unbindShader();
-
-
 }
 private:
-	void bindShader() {
+	void bindShader()
+	{
 		glUseProgram(_pid);
 		glBindVertexArray(_vao);
 		check_error_gl();
@@ -246,8 +248,8 @@ private:
 		if (vpoint_id >= 0)
 			glDisableVertexAttribArray(vpoint_id);
 		GLint vnormal_id = glGetAttribLocation(_pid, "vnormal");
-		if (vnormal_id >= 0)
-			glDisableVertexAttribArray(vnormal_id);
+//		if (vnormal_id >= 0)
+		//	glDisableVertexAttribArray(vnormal_id);
 		glUseProgram(0);
 		glBindVertexArray(0);
 	}

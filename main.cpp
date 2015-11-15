@@ -19,6 +19,7 @@ const double MovePerPixel = 0.001;
 int lastx; int lasty;
 
 vec3 dirVec(1, 1, -1);
+
 //Viewing matrices
 mat4 VIEW;
 mat4 PROJ;
@@ -83,12 +84,12 @@ void RotateX(vec3 *dir, float rot)
 }
 void CamRotate(int xnew, int ynew, int xold, int yold)
 {
+	float XRot = (ynew - yold) * RadPerPixel;
 	float YRot = (xnew - xold) * RadPerPixel;
-	float ZRot = (ynew - yold) * RadPerPixel;
-	float XRot = (ynew- yold) * RadPerPixel;
+//	float ZRot = (ynew - yold) * RadPerPixel;
+	RotateX(&dirVec, XRot);
 	RotateY(&dirVec, YRot);
 //	RotateZ(&dirVec, ZRot);
-	RotateX(&dirVec, XRot);
 	VIEW = Eigen::lookAt(dirVec, vec3(0, 0, 0), vec3(0, 1, 0));
 	lastx = xnew; lasty = ynew;
 }
@@ -151,7 +152,7 @@ void init(){
     glClearColor(0.5,0.5,0.5, /*solid*/1.0 );    
     glEnable(GL_DEPTH_TEST);
 //    mesh.init();
-	terrain.init(256,256);
+	terrain.init(512,512);
 
 	//setup viewing matrices;
 	MODEL = mat4::Identity();
@@ -182,6 +183,11 @@ void keyboard(int key, int action){
     if(action != GLFW_RELEASE) return; ///< only act on release
     switch(key){
         case '0': break;
+		case 'w':
+			dirVec.x() -= 1.0;
+			VIEW = Eigen::lookAt(dirVec, vec3(0, 0, 0), vec3(0, 1, 0));
+			break;
+			
         default: break;
     }
 }
