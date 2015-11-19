@@ -31,8 +31,11 @@ void main() {
     vec3 rock = texture(tex_rock, uv).rgb;
 	vec3 debug = texture(tex_debug, uv).rgb;
 	vec3 sand = texture(tex_sand, uv).rgb;
-    
-    color = texture(tex_debug, uv).rgb;
+    if(fpoint.y > 0.5)
+		color = texture(tex_rock, uv).rgb;
+	else if(fpoint.y <= 0.5)
+		color = texture(tex_grass,uv).rgb; 
+//    color = texture(tex_debug, uv).rgb;
 //	color = mix(grass, rock, max(lamb,0));
 	//-------
 /*

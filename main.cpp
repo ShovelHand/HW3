@@ -20,7 +20,7 @@ const double RadPerPixel = 0.01;
 const double MovePerPixel = 0.001;
 int lastx; int lasty;
 
-vec3 dirVec(-1.216, -0.85, -2.177);
+vec3 dirVec(-0.8607, 1.1486, -2.177);
 
 //Viewing matrices
 mat4 VIEW;
@@ -154,7 +154,7 @@ void init(){
     glClearColor(0.5,0.5,0.5, /*solid*/1.0 );    
     glEnable(GL_DEPTH_TEST);
 //    mesh.init();
-	terrain.init(10, 10);
+	terrain.init(200, 200);
 	skybox.init(20, 20);
 
 	//setup viewing matrices;
