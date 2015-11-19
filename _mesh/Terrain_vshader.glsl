@@ -21,7 +21,7 @@ void main() {
     fpoint = vpoint + .5; ///< For coloring Debug [0,1]^3 
     fnormal_cam = inverse( transpose( mat3(VIEW * MODEL) )) * vnormal; 
 
-	vheight = vpoint.y*7;
+	vheight = vpoint.y;
 
     gl_Position = PROJ * VIEW * MODEL * vec4(vpoint, 3.0);
     uv = vec2(fpoint.x, fpoint.z);

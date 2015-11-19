@@ -44,17 +44,17 @@ void buildMeshVertices(int width, int height)
 {
 	RGBImage base(width, height);
 
-	for (int i = 0; i < height; i += 1.0)
+	/*for (int i = 0; i < height; i += 1.0)
 	{
 		for (int j = 0; j < width; j+= 1.0)
 		{
 			base(i, j) = vec3(i / float(width), j / float(height), 0);
-		}
-	}
+		}*/
+//	}
 
 	//set vertex heights using Perlin noise
-	int period = 6;
-	float frequency = 1.6f / period;
+	int period = 12;
+	float frequency = 1.5f / period;
 	std::srand(1);
 	vec3 randGradientVec;
 
@@ -202,7 +202,7 @@ void init(int width, int height)
 
 	///--- Load texture sand
 	glGenTextures(1, &_tex_sand);
-	glBindTexture(GL_TEXTURE_2D, _tex_rock);
+	glBindTexture(GL_TEXTURE_2D, _tex_sand);
 	glfwLoadTexture2D("_mesh/sand.tga", 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -210,7 +210,7 @@ void init(int width, int height)
 
 	///--- Load texture snow
 	glGenTextures(1, &_tex_snow);
-	glBindTexture(GL_TEXTURE_2D, _tex_rock);
+	glBindTexture(GL_TEXTURE_2D, _tex_snow);
 	glfwLoadTexture2D("_mesh/snow.tga", 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -218,7 +218,7 @@ void init(int width, int height)
 
 	///--- Load texture water
 	glGenTextures(1, &_tex_water);
-	glBindTexture(GL_TEXTURE_2D, _tex_rock);
+	glBindTexture(GL_TEXTURE_2D, _tex_water);
 	glfwLoadTexture2D("_mesh/water.tga", 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

@@ -31,13 +31,16 @@ void main() {
     vec3 rock = texture(tex_rock, uv).rgb;
 	vec3 debug = texture(tex_debug, uv).rgb;
 	vec3 sand = texture(tex_sand, uv).rgb;
-    if(fpoint.y > 0.5)
-		color = texture(tex_rock, uv).rgb;
-	else if(fpoint.y <= 0.5)
-		color = texture(tex_grass,uv).rgb; 
-//    color = texture(tex_debug, uv).rgb;
-//	color = mix(grass, rock, max(lamb,0));
-	//-------
+	
+	if(fpoint.y > 3)
+		color = texture(tex_snow, uv).rgb;
+    if(fpoint.y > 0.8  && fpoint.y <3)
+		color = mix(grass/2, rock, max(lamb,0));
+	else if(fpoint.y > 0.2 && fpoint.y <=0.8)
+		color = texture(tex_grass, uv).rgb;
+	else if(fpoint.y <= 0.2 )
+		color = texture(tex_sand, uv).rgb;
+
 /*
     vec3 N = normalize(fnormal_cam);
     vec3 L = vec3(0,0,-1);
