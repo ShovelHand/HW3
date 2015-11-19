@@ -1,12 +1,14 @@
 #include "icg_common.h"
 #include "_mesh/Mesh.h"
 #include "_mesh/TerrainMesh.h"
+#include "_mesh/Skybox.h"
 
 int window_width = 640;
 int window_height = 640;
 
 Mesh mesh;
 TerrainMesh terrain;
+Skybox skybox;
 
 typedef Eigen::Transform<float, 3, Eigen::Affine> Transform;
 
@@ -18,7 +20,7 @@ const double RadPerPixel = 0.01;
 const double MovePerPixel = 0.001;
 int lastx; int lasty;
 
-vec3 dirVec(1, 1, -1);
+vec3 dirVec(-1.216, -0.85, -2.177);
 
 //Viewing matrices
 mat4 VIEW;
@@ -152,12 +154,13 @@ void init(){
     glClearColor(0.5,0.5,0.5, /*solid*/1.0 );    
     glEnable(GL_DEPTH_TEST);
 //    mesh.init();
-	terrain.init(512,512);
+	terrain.init(10, 10);
+	skybox.init(20, 20);
 
 	//setup viewing matrices;
 	MODEL = mat4::Identity();
 	VIEW = Eigen::lookAt(dirVec, vec3(0, 0, 0), vec3(0, 1, 0));
-	PROJ = Eigen::perspective(45.0f, window_width / (float)window_height, 0.1f, 10.0f);
+	PROJ = Eigen::perspective(45.0f, window_width / (float)window_height, 0.1f, 100.0f);
 }
 
 void display(){
@@ -174,18 +177,18 @@ void display(){
 	glUseProgram(pid);
 
 	terrain.draw();
+//	skybox.draw();
 //	mesh.draw();
 }
 
 void cleanup(){}
 
 void keyboard(int key, int action){
-    if(action != GLFW_RELEASE) return; ///< only act on release
+    if(action != GLFW_PRESS) return; ///< only act on release
     switch(key){
         case '0': break;
-		case 'w':
-			dirVec.x() -= 1.0;
-			VIEW = Eigen::lookAt(dirVec, vec3(0, 0, 0), vec3(0, 1, 0));
+		case 'w': case 'W':
+			printf("%f, %f, %f", dirVec.x(), dirVec.y(), dirVec.z());
 			break;
 			
         default: break;

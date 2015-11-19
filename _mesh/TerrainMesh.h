@@ -10,8 +10,12 @@ private:
 	GLuint _pid; ///< GLSL shader program ID 
 	GLuint _vbo_vpointTerrain; ///< memory buffer
 	GLuint _vbo_vtexcoord; ///< memory buffer
-	GLuint _tex_day; ///< Texture ID
-	GLuint _tex_night; ///< Texture ID
+	GLuint _tex_grass; ///< Texture ID
+	GLuint _tex_rock; ///< Texture ID
+	GLuint _tex_sand; ///< Texture ID
+	GLuint _tex_snow; ///< Texture ID
+	GLuint _tex_water; ///< Texture ID
+	GLuint _tex_uvDebug; ///< Texture ID
 
 	opengp::Surface_mesh mesh;
 	GLuint _vnormal;   ///< memory buffer
@@ -40,17 +44,17 @@ void buildMeshVertices(int width, int height)
 {
 	RGBImage base(width, height);
 
-	for (int i = 0; i < height; ++i)
+	for (int i = 0; i < height; i += 1.0)
 	{
-		for (int j = 0; j < width; ++j)
+		for (int j = 0; j < width; j+= 1.0)
 		{
 			base(i, j) = vec3(i / float(width), j / float(height), 0);
 		}
 	}
 
 	//set vertex heights using Perlin noise
-	int period = 4;
-	float frequency = 1.0f / period;
+	int period = 6;
+	float frequency = 1.6f / period;
 	std::srand(1);
 	vec3 randGradientVec;
 
@@ -64,8 +68,8 @@ void buildMeshVertices(int width, int height)
 			base(i, j) = randGradientVec;
 		}
 	//set terrain mesh vertices
-	for (int i = 0; i < height; ++i)
-		for (int j = 0; j < width; ++j)
+	for (int i = 0; i < height; i += 1.0)
+		for (int j = 0; j < width; j += 1.0)
 		{
 			int left = (i / period) * period;
 			int right = (left + period) % width;
@@ -102,13 +106,13 @@ void buildMeshVertices(int width, int height)
 			vertices.push_back(vec3(float(i), noise, float(j))); //once working in 3d, will probably transpose y and z
 		}
 	//	showImage(image);
-
+	/*
 	for (std::vector<vec3>::iterator itr = vertices.begin(); itr != vertices.end(); ++itr)
 	{
 		(*itr).x() -= 3.0;
 		(*itr).z() -= 3.0;
 	}
-
+	*/
 	//triangle strip
 	for (int j = 0; j < (height - 1); ++j)
 	{
@@ -156,6 +160,12 @@ void init(int width, int height)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vec3)*triangle_vec.size(), &triangle_vec[0], GL_STATIC_DRAW);
 
 	///--- Normal Buffer
+	/*For every triangle of the mesh
+    Compute the triangle normal by the cross-product of the triangle edges
+    Add the computed normal to each of the triangle's vertices
+
+	For every vertex of the mesh
+    Normalize the vertex normal*/
 
 	///--- Attribute
 	GLuint vpoint_id = glGetAttribLocation(_pid, "vpoint");
@@ -164,23 +174,55 @@ void init(int width, int height)
 
 
 	///--- Texture coordinates
-	
 
-	///--- Load texture
-	glGenTextures(1, &_tex_day);
-	glBindTexture(GL_TEXTURE_2D, _tex_day);
-	glfwLoadTexture2D("_mesh/plane.tga", 0);
+
+	///--- Load texture grass
+	glGenTextures(1, &_tex_grass);
+	glBindTexture(GL_TEXTURE_2D, _tex_grass);
+	glfwLoadTexture2D("_mesh/grass.tga", 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glUniform1i(glGetUniformLocation(_pid, "tex_day"), 0 /*GL_TEXTURE0*/);
+	glUniform1i(glGetUniformLocation(_pid, "tex_grass"), 0 /*GL_TEXTURE0*/);
 
-	///--- Load texture
-	glGenTextures(1, &_tex_night);
-	glBindTexture(GL_TEXTURE_2D, _tex_night);
-	glfwLoadTexture2D("_mesh/night.tga", 0);
+	///--- Load texture rock
+	glGenTextures(1, &_tex_rock);
+	glBindTexture(GL_TEXTURE_2D, _tex_rock);
+	glfwLoadTexture2D("_mesh/rock.tga", 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glUniform1i(glGetUniformLocation(_pid, "tex_night"), 1 /*GL_TEXTURE1*/);
+	glUniform1i(glGetUniformLocation(_pid, "tex_rock"), 1 /*GL_TEXTURE1*/);
+
+	///--- Load texture debug
+	glGenTextures(1, &_tex_uvDebug);
+	glBindTexture(GL_TEXTURE_2D, _tex_uvDebug);
+	glfwLoadTexture2D("_mesh/quad_texture.tga", 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glUniform1i(glGetUniformLocation(_pid, "tex_debug"), 2 /*GL_TEXTURE1*/);
+
+	///--- Load texture sand
+	glGenTextures(1, &_tex_sand);
+	glBindTexture(GL_TEXTURE_2D, _tex_rock);
+	glfwLoadTexture2D("_mesh/sand.tga", 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glUniform1i(glGetUniformLocation(_pid, "tex_sand"), 3 /*GL_TEXTURE3*/);
+
+	///--- Load texture snow
+	glGenTextures(1, &_tex_snow);
+	glBindTexture(GL_TEXTURE_2D, _tex_rock);
+	glfwLoadTexture2D("_mesh/snow.tga", 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glUniform1i(glGetUniformLocation(_pid, "tex_snow"), 4 /*GL_TEXTURE4*/);
+
+	///--- Load texture water
+	glGenTextures(1, &_tex_water);
+	glBindTexture(GL_TEXTURE_2D, _tex_rock);
+	glfwLoadTexture2D("_mesh/water.tga", 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glUniform1i(glGetUniformLocation(_pid, "tex_water"), 5 /*GL_TEXTURE5*/);
 
 
 	///--- to avoid the current object being polluted
@@ -204,9 +246,17 @@ void draw()
 	bindShader();
 	///--- Bind textures
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, _tex_day);
+	glBindTexture(GL_TEXTURE_2D, _tex_grass);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, _tex_night);
+	glBindTexture(GL_TEXTURE_2D, _tex_rock);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, _tex_uvDebug);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, _tex_sand);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, _tex_snow);
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, _tex_water);
 
 	glUniform1f(glGetUniformLocation(_pid, "time"), glfwGetTime());
 
@@ -228,6 +278,7 @@ private:
 		if (vpoint_id >= 0) {
 			glEnableVertexAttribArray(vpoint_id);
 			check_error_gl();
+			glGenBuffers(1, &_vbo_vpointTerrain);
 			glBindBuffer(GL_ARRAY_BUFFER, _vbo_vpointTerrain);
 			glVertexAttribPointer(vpoint_id, 3 /*vec3*/, GL_FLOAT, DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
 			check_error_gl();

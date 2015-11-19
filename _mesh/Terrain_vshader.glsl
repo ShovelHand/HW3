@@ -7,6 +7,10 @@ out vec3 fpoint; ///< for debug
 out vec3 fnormal_cam;
 out float vheight; ///< for debug coloring
 
+in vec2 vtexcoord;
+out vec2 uv;
+
+
 
 ///--- Uploaded by Eigen in C++
 uniform mat4 MODEL;
@@ -19,6 +23,7 @@ void main() {
 
 	vheight = vpoint.y*7;
 
-    gl_Position = PROJ * VIEW * MODEL * vec4(vpoint, 1.0);
+    gl_Position = PROJ * VIEW * MODEL * vec4(vpoint, 3.0);
+    uv = vec2(fpoint.x, fpoint.z);
 
 }
