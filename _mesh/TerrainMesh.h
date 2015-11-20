@@ -4,11 +4,14 @@
 #include "OpenGLImage/EigenVisualizer.h"
 using namespace EigenVisualizer;
 
+typedef Eigen::Transform<float, 3, Eigen::Affine> Transform;
+
 class TerrainMesh{
 private:
 	GLuint _vao; ///< vertex array object
 	GLuint _pid; ///< GLSL shader program ID 
 	GLuint _vbo_vpointTerrain; ///< memory buffer
+	
 	GLuint _vbo_vtexcoord; ///< memory buffer
 	GLuint _tex_grass; ///< Texture ID
 	GLuint _tex_rock; ///< Texture ID
@@ -16,6 +19,7 @@ private:
 	GLuint _tex_snow; ///< Texture ID
 	GLuint _tex_water; ///< Texture ID
 	GLuint _tex_uvDebug; ///< Texture ID
+	GLuint _tex_heightMap;
 
 	opengp::Surface_mesh mesh;
 	GLuint _vnormal;   ///< memory buffer
@@ -40,21 +44,26 @@ float rand0_1()
 {
 	return ((float)std::rand()) / ((float)RAND_MAX);
 }
-void buildMeshVertices(int width, int height)
+
+void loadTextureRGB32F(void * pTex, int width, int height)
+{
+	glBindTexture(GL_TEXTURE_2D, _tex_heightMap);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width,
+		height, 0, GL_RGB, GL_FLOAT,
+		pTex);
+}
+
+//Make the perlin noise image to upload as texture
+RGBImage BuildNoiseImage(int width, int height)
 {
 	RGBImage base(width, height);
-
-	/*for (int i = 0; i < height; i += 1.0)
-	{
-		for (int j = 0; j < width; j+= 1.0)
-		{
-			base(i, j) = vec3(i / float(width), j / float(height), 0);
-		}*/
-//	}
-
 	//set vertex heights using Perlin noise
-	int period = 12;
-	float frequency = 1.5f / period;
+	int period = 64;
+	float frequency = 1.0f / period;
 	std::srand(1);
 	vec3 randGradientVec;
 
@@ -102,17 +111,21 @@ void buildMeshVertices(int width, int height)
 			float noise = mix(st, uv, fy);
 
 			base(i, j) = vec3(noise, noise, noise);
-
-			vertices.push_back(vec3(float(i), noise, float(j))); //once working in 3d, will probably transpose y and z
 		}
-	//	showImage(image);
-	/*
-	for (std::vector<vec3>::iterator itr = vertices.begin(); itr != vertices.end(); ++itr)
-	{
-		(*itr).x() -= 3.0;
-		(*itr).z() -= 3.0;
-	}
-	*/
+		
+	return base;
+
+}
+
+void MakeVertices(int width, int height)
+{
+	
+	for (int i = 0; i < height; i++)
+		for (int j = 0; j < width; j++)
+		{
+			vertices.push_back(vec3(float(i), 0.0, float(j)));
+		}
+
 	//triangle strip
 	for (int j = 0; j < (height - 1); ++j)
 	{
@@ -131,10 +144,10 @@ void buildMeshVertices(int width, int height)
 			triangle_vec.push_back(vertices[topright]);
 			triangle_vec.push_back(vertices[bottomright]);
 			triangle_vec.push_back(vertices[bottomleft]);
-
 		}
 	}
 }
+
 public:
 GLuint getProgramID(){
 	return _pid;
@@ -152,7 +165,8 @@ void init(int width, int height)
 	glGenVertexArrays(1, &_vao);
 	glBindVertexArray(_vao);
 	
-	buildMeshVertices(width, height);
+	
+	MakeVertices(width, height);
 
 	///--- Buffer
 	glGenBuffers(1, &_vbo_vpointTerrain);
@@ -171,10 +185,6 @@ void init(int width, int height)
 	GLuint vpoint_id = glGetAttribLocation(_pid, "vpoint");
 	glEnableVertexAttribArray(vpoint_id);
 	glVertexAttribPointer(vpoint_id, 3, GL_FLOAT, DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
-
-
-	///--- Texture coordinates
-
 
 	///--- Load texture grass
 	glGenTextures(1, &_tex_grass);
@@ -224,6 +234,22 @@ void init(int width, int height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glUniform1i(glGetUniformLocation(_pid, "tex_water"), 5 /*GL_TEXTURE5*/);
 
+	RGBImage Noise = BuildNoiseImage(200,200); //lets give this some different dimensions
+
+	///--- Load texture heightmap
+	glGenTextures(1, &_tex_heightMap);
+	
+	glUniform1i(glGetUniformLocation(_pid, "tex_height"), 6 /*GL_TEXTURE6*/);
+	glBindTexture(GL_TEXTURE_2D, _tex_heightMap);
+	glfwLoadTexture2D("_mesh/texture.tga", 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width,
+	//	height, 0, GL_RGB, GL_FLOAT,
+	//	Noise.data());
+	
 
 	///--- to avoid the current object being polluted
 	glBindVertexArray(0);
@@ -257,8 +283,19 @@ void draw()
 	glBindTexture(GL_TEXTURE_2D, _tex_snow);
 	glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_2D, _tex_water);
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_2D, _tex_heightMap);
 
 	glUniform1f(glGetUniformLocation(_pid, "time"), glfwGetTime());
+
+
+	///--- Upload transformation
+	Transform M = Transform::Identity();
+	//could scale the mesh to make it look less blocky.
+//	M *= Eigen::AlignedScaling3f(0.1, 0.1, 0.1);
+	GLuint M_id = glGetUniformLocation(_pid, "M");
+	glUniformMatrix4fv(M_id, ONE, DONT_TRANSPOSE, M.data());
+	
 
 	glDrawArrays(GL_TRIANGLES, 0, triangle_vec.size());  //uncomment to see the mesh drawn as triangle strips
 	
@@ -282,6 +319,7 @@ private:
 			glBindBuffer(GL_ARRAY_BUFFER, _vbo_vpointTerrain);
 			glVertexAttribPointer(vpoint_id, 3 /*vec3*/, GL_FLOAT, DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
 			check_error_gl();
+
 		}
 
 		/////--- Vertex Attribute ID for Normals
@@ -291,6 +329,7 @@ private:
 			glBindBuffer(GL_ARRAY_BUFFER, _vnormal);
 			glVertexAttribPointer(vnormal_id, 3 /*vec3*/, GL_FLOAT, DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
 			check_error_gl();
+
 		}
 	}
 
