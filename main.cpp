@@ -154,7 +154,7 @@ void init(){
     glClearColor(0.5,0.5,0.5, /*solid*/1.0 );    
     glEnable(GL_DEPTH_TEST);
 //    mesh.init();
-	terrain.init(200, 200);
+	terrain.init(400, 400);
 	skybox.init(20, 20);
 
 	//setup viewing matrices;

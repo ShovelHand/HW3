@@ -26,6 +26,7 @@ private:
 	
 	std::vector<vec3> vertices;
 	std::vector<vec3> triangle_vec; //defines the order in which vertices are used in the triangle strips
+	std::vector<vec2> vtexcoord;
 
 	/*Perlin noise helper functions*/
 float mix(float x, float y, float alpha)
@@ -63,7 +64,7 @@ RGBImage BuildNoiseImage(int width, int height)
 	RGBImage base(width, height);
 	//set vertex heights using Perlin noise
 	int period = 64;
-	float frequency = 1.0f / period;
+	float frequency = 1.3f / period;
 	std::srand(1);
 	vec3 randGradientVec;
 
@@ -121,10 +122,15 @@ void MakeVertices(int width, int height)
 {
 	
 	for (int i = 0; i < height; i++)
+	{
 		for (int j = 0; j < width; j++)
 		{
 			vertices.push_back(vec3(float(i), 0.0, float(j)));
+			//height map texture coords
+			vtexcoord.push_back(vec2(float(j) / float(width), float(i) / float(height)));
+			
 		}
+	}
 
 	//triangle strip
 	for (int j = 0; j < (height - 1); ++j)
@@ -165,7 +171,6 @@ void init(int width, int height)
 	glGenVertexArrays(1, &_vao);
 	glBindVertexArray(_vao);
 	
-	
 	MakeVertices(width, height);
 
 	///--- Buffer
@@ -185,6 +190,9 @@ void init(int width, int height)
 	GLuint vpoint_id = glGetAttribLocation(_pid, "vpoint");
 	glEnableVertexAttribArray(vpoint_id);
 	glVertexAttribPointer(vpoint_id, 3, GL_FLOAT, DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
+
+	glUniform1i(glGetUniformLocation(_pid, "width"), width);
+	glUniform1i(glGetUniformLocation(_pid, "depth"), height);
 
 	///--- Load texture grass
 	glGenTextures(1, &_tex_grass);
@@ -236,19 +244,36 @@ void init(int width, int height)
 
 	RGBImage Noise = BuildNoiseImage(200,200); //lets give this some different dimensions
 
+	{
+		/*const GLfloat vtexcoord[] = { 1.0f, 0.0f,
+			1.0f, 1.0f,
+			0.0f, 0.0f,
+			0.0f, 1.0f,
+		};*/
+
+		///--- Buffer
+		glGenBuffers(1, &_vbo_vtexcoord);
+		glBindBuffer(GL_ARRAY_BUFFER, _vbo_vtexcoord);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vec2)*vtexcoord.size(), &vtexcoord[0], GL_STATIC_DRAW);
+
+		///--- Attribute
+		GLuint vtexcoord_id = glGetAttribLocation(_pid, "TexCoord");
+		glEnableVertexAttribArray(vtexcoord_id);
+		glVertexAttribPointer(vtexcoord_id, 2, GL_FLOAT, DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
+	}
 	///--- Load texture heightmap
 	glGenTextures(1, &_tex_heightMap);
 	
 	glUniform1i(glGetUniformLocation(_pid, "tex_height"), 6 /*GL_TEXTURE6*/);
 	glBindTexture(GL_TEXTURE_2D, _tex_heightMap);
-	glfwLoadTexture2D("_mesh/texture.tga", 0);
+//	glfwLoadTexture2D("_mesh/texture.tga", 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width,
-	//	height, 0, GL_RGB, GL_FLOAT,
-	//	Noise.data());
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, Noise.cols(),
+		Noise.rows(), 0, GL_RGB, GL_FLOAT,
+		Noise.data());
 	
 
 	///--- to avoid the current object being polluted
@@ -313,7 +338,7 @@ private:
 		/////--- Vertex Attribute ID for Positions
 		GLint vpoint_id = glGetAttribLocation(_pid, "_vbo_vpointTerrain");
 		if (vpoint_id >= 0) {
-			glEnableVertexAttribArray(vpoint_id);
+			glEnableVertexAttribArray(_vbo_vpointTerrain);
 			check_error_gl();
 			glGenBuffers(1, &_vbo_vpointTerrain);
 			glBindBuffer(GL_ARRAY_BUFFER, _vbo_vpointTerrain);

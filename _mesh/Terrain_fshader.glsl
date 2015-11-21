@@ -1,4 +1,5 @@
 #version 330 core
+in vec2 TexCoord0;
 out vec3 color;
 in vec3 fpoint;
 in vec3 fnormal_cam;
@@ -13,11 +14,6 @@ uniform sampler2D tex_sand;
 uniform sampler2D tex_snow;
 uniform sampler2D tex_water;
 uniform sampler2D tex_height;
-
-vec3 R = vec3(1,0,0);
-vec3 G = vec3(0,1,0);
-vec3 B = vec3(0,0,1);
-vec3 K = vec3(0,0,0);
 
 void main() {
 	vec3 N = normalize(fnormal_cam);
@@ -43,7 +39,7 @@ void main() {
 		color = texture(tex_sand, uv).rgb;
 		*/
 //	color = texture(tex_grass,vec2(uv)).rgb;
-	color = texture(tex_height, uv).rgb;
+	color = texture(tex_height, TexCoord0.st).rgb;
 	
 	if(lamb>0){
         vec3 V = vec3(0,0,-1);
