@@ -18,7 +18,7 @@ uniform mat4 M;
 
 uniform sampler2D tex_height;
 float tex_at(vec2 uv){ return texture(tex_height,uv).r; }
-
+float scalar = 2;
 
 void main() {          
     fpoint = vpoint + .5; ///< For coloring Debug [0,1]^3 
@@ -26,7 +26,7 @@ void main() {
 
 	vheight =  tex_at(TexCoord);
 
-    gl_Position = PROJ * VIEW * MODEL * M * vec4(vpoint.x, vheight, vpoint.z, 1.0);
+    gl_Position = PROJ * VIEW * MODEL * M * vec4(vpoint.x, vheight*scalar, vpoint.z, 1.0);
 	TexCoord0 = TexCoord;
     uv = vec2(fpoint.x, fpoint.z);
 }

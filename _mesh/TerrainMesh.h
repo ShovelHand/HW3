@@ -127,8 +127,6 @@ void MakeVertices(int width, int height)
 		{
 			vertices.push_back(vec3(float(i), 0.0, float(j)));
 			//height map texture coords
-			vtexcoord.push_back(vec2(float(j) / float(width), float(i) / float(height)));
-			
 		}
 	}
 
@@ -152,6 +150,11 @@ void MakeVertices(int width, int height)
 			triangle_vec.push_back(vertices[bottomleft]);
 		}
 	}
+
+	//make the pixel coordinates for the height map texture
+	for (std::vector<vec3>::iterator itr = triangle_vec.begin(); itr != triangle_vec.end(); ++itr)
+		vtexcoord.push_back(vec2((*itr).x()/float(width), (*itr).z()/float(height)));
+
 }
 
 public:
@@ -244,13 +247,8 @@ void init(int width, int height)
 
 	RGBImage Noise = BuildNoiseImage(200,200); //lets give this some different dimensions
 
+	//vertex buffer for heightmap texture
 	{
-		/*const GLfloat vtexcoord[] = { 1.0f, 0.0f,
-			1.0f, 1.0f,
-			0.0f, 0.0f,
-			0.0f, 1.0f,
-		};*/
-
 		///--- Buffer
 		glGenBuffers(1, &_vbo_vtexcoord);
 		glBindBuffer(GL_ARRAY_BUFFER, _vbo_vtexcoord);
