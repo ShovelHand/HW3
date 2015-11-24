@@ -3,6 +3,10 @@
 #include "_mesh/TerrainMesh.h"
 #include "_mesh/Skybox.h"
 
+#include "OpenGLImage/EigenVisualizer.h"
+
+using namespace EigenVisualizer;
+
 int window_width = 640;
 int window_height = 640;
 

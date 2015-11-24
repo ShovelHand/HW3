@@ -2,9 +2,12 @@
 #include "icg_common.h"
 
 #include "OpenGLImage/EigenVisualizer.h"
+#include <math.h>
+
 using namespace EigenVisualizer;
 
 typedef Eigen::Transform<float, 3, Eigen::Affine> Transform;
+#define MAX_OCTAVES 200
 
 class TerrainMesh{
 private:
@@ -27,7 +30,8 @@ private:
 	std::vector<vec3> vertices;
 	std::vector<vec3> triangle_vec; //defines the order in which vertices are used in the triangle strips
 	std::vector<vec2> vtexcoord;
-
+//	std::vector<float> noiseVec;
+	float noiseArray[600][600];
 	/*Perlin noise helper functions*/
 float mix(float x, float y, float alpha)
 {
@@ -46,17 +50,6 @@ float rand0_1()
 	return ((float)std::rand()) / ((float)RAND_MAX);
 }
 
-void loadTextureRGB32F(void * pTex, int width, int height)
-{
-	glBindTexture(GL_TEXTURE_2D, _tex_heightMap);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width,
-		height, 0, GL_RGB, GL_FLOAT,
-		pTex);
-}
 
 //Make the perlin noise image to upload as texture
 RGBImage BuildNoiseImage(int width, int height)
@@ -64,8 +57,8 @@ RGBImage BuildNoiseImage(int width, int height)
 	RGBImage base(width, height);
 	//set vertex heights using Perlin noise
 	int period = 64;
-	float frequency = 1.3f / period;
-	std::srand(1);
+	float frequency = 1.0f / period;
+	std::srand(177);
 	vec3 randGradientVec;
 
 	for (int i = 0; i < width; ++i)
@@ -75,11 +68,11 @@ RGBImage BuildNoiseImage(int width, int height)
 			randGradientVec.x() = cos(2 * M_PI * rand0_1());
 			randGradientVec.y() = sin(2 * M_PI * rand0_1());
 			randGradientVec.z() = 0;
-			base(i, j) = randGradientVec;
+			base(i, j) = randGradientVec; //make base noise image
 		}
-	//set terrain mesh vertices
-	for (int i = 0; i < height; i += 1.0)
-		for (int j = 0; j < width; j += 1.0)
+
+	for (int i = 0; i < width; i++)
+		for (int j = 0; j < height; j++)
 		{
 			int left = (i / period) * period;
 			int right = (left + period) % width;
@@ -94,14 +87,13 @@ RGBImage BuildNoiseImage(int width, int height)
 			vec2 c(dx - 1, 1 - dy);
 			vec2 d(dx, 1 - dy);
 
-
-			vec3 topleft = base(left, top);
+			vec3 topleft = base(top, left);
+			vec3 topright = base(top, right);
+			vec3 bottomleft = base(bottom, left);
+			vec3 bottomright = base(bottom, right);
 			float s = topleft(0) * a(0) + topleft(1) * a(1);
-			vec3 topright = base(right, top);
 			float t = topright(0) * b(0) + topright(1) * b(1);
-			vec3 bottomleft = base(left, bottom);
 			float u = bottomleft(0) * d(0) + bottomleft(1) * d(1);
-			vec3 bottomright = base(right, bottom);
 			float v = bottomright(0) * c(0) + bottomright(1) * c(1);
 
 			float fx = f(dx);
@@ -111,11 +103,56 @@ RGBImage BuildNoiseImage(int width, int height)
 			float uv = mix(u, v, fx);
 			float noise = mix(st, uv, fy);
 
-			base(i, j) = vec3(noise, noise, noise);
+//			base(i,j) = vec3(noise, noise, noise);
+			noiseArray[i][j] = noise;
 		}
-		
-	return base;
 
+	for (int i = 0; i < height; i++)
+	{
+		for (int j = 0; j < width; j++)
+		{
+			float value = fBm(vec2(i, j), 1, 2, 50, width);
+			base(j,i) = vec3(value, value, value);
+		}
+	}
+
+	return base;
+}
+
+float fBm(vec2 point, float H, int lacunarity, int octaves, int max)
+{
+	float value, frequency, remainder; 
+	int i;
+	static bool first = true;
+	static float exp_array[MAX_OCTAVES]; //TODO: define MAX_OCTAVES
+
+	if (first)
+	{
+		frequency = 0.2;
+
+		for (i = 0; i< MAX_OCTAVES; i++) //TODO: define MAX_OCTAVES
+		{ /* compute weight for each frequency */
+			exp_array[i] = pow(frequency, -H);
+			frequency *= lacunarity;
+		}
+
+		first = false;
+	}
+	value = 0.0;
+
+	/* inner loop of spectral construction */ 
+	for (i = 0; i < octaves; i++)
+	{
+		if (point.x() <= max && point.y() <= max)
+			value += noiseArray[int(point.x())][int(point.y())]  *exp_array[i];
+		point.x() *= lacunarity; point.y() *= lacunarity; //point.z() *= lacunarity;
+	} /* for */
+
+	remainder = octaves - (int)octaves;
+	if (remainder) /* add in "octaves" remainder */ /* "i" and spatial freq. are preset in loop above */
+		value += remainder * noiseArray[int(point.x())][int(point.y())] * exp_array[i];
+
+	return value;
 }
 
 void MakeVertices(int width, int height)
@@ -124,10 +161,7 @@ void MakeVertices(int width, int height)
 	for (int i = 0; i < height; i++)
 	{
 		for (int j = 0; j < width; j++)
-		{
 			vertices.push_back(vec3(float(i), 0.0, float(j)));
-			//height map texture coords
-		}
 	}
 
 	//triangle strip
@@ -245,7 +279,7 @@ void init(int width, int height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glUniform1i(glGetUniformLocation(_pid, "tex_water"), 5 /*GL_TEXTURE5*/);
 
-	RGBImage Noise = BuildNoiseImage(200,200); //lets give this some different dimensions
+	RGBImage Noise = BuildNoiseImage(512,512); //lets give this some different dimensions
 
 	//vertex buffer for heightmap texture
 	{
@@ -273,7 +307,6 @@ void init(int width, int height)
 		Noise.rows(), 0, GL_RGB, GL_FLOAT,
 		Noise.data());
 	
-
 	///--- to avoid the current object being polluted
 	glBindVertexArray(0);
 	glUseProgram(0);

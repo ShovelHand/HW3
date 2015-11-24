@@ -12,7 +12,7 @@ private:
 public:
     void init(){
         ///--- Compile the shaders
-        _pid = opengp::load_shaders("OpenGLImage/vshader.glsl", "OpenGLImage/fshader.glsl");
+        _pid = opengp::load_shaders("C:/icg/lecture_viewing3d/OpenGlImage/vshader.glsl.txt", "C:/icg/lecture_viewing3d/OpenGlImage/fshader.glsl.txt");
         if(!_pid) exit(EXIT_FAILURE);       
         glUseProgram(_pid);
         
