@@ -7,7 +7,8 @@
 using namespace EigenVisualizer;
 
 typedef Eigen::Transform<float, 3, Eigen::Affine> Transform;
-#define MAX_OCTAVES 200
+#define MAX_OCTAVES 16
+#define FBM_SIZE 512
 
 class TerrainMesh{
 private:
@@ -40,8 +41,7 @@ float mix(float x, float y, float alpha)
 
 float f(float t)
 {
-	float t_3 = t * t * t;
-	return 6 * t * t * t_3 - 15 * t * t_3 + 10 * t_3;
+	return 6 * pow(t,5) - 15 * pow(t,4) + 10 * pow(t,3);
 }
 
 //return a random floating point number between [0, 1]
@@ -58,7 +58,7 @@ RGBImage BuildNoiseImage(int width, int height)
 	//set vertex heights using Perlin noise
 	int period = 64;
 	float frequency = 1.0f / period;
-	std::srand(177);
+	std::srand(19);
 	vec3 randGradientVec;
 
 	for (int i = 0; i < width; ++i)
@@ -71,8 +71,9 @@ RGBImage BuildNoiseImage(int width, int height)
 			base(i, j) = randGradientVec; //make base noise image
 		}
 
-	for (int i = 0; i < width; i++)
-		for (int j = 0; j < height; j++)
+	for (int j = 0; j < width; ++j)
+	{
+		for (int i = 0; i < height; ++i)
 		{
 			int left = (i / period) * period;
 			int right = (left + period) % width;
@@ -87,13 +88,13 @@ RGBImage BuildNoiseImage(int width, int height)
 			vec2 c(dx - 1, 1 - dy);
 			vec2 d(dx, 1 - dy);
 
-			vec3 topleft = base(top, left);
-			vec3 topright = base(top, right);
-			vec3 bottomleft = base(bottom, left);
-			vec3 bottomright = base(bottom, right);
+			vec3 topleft = base(left, top);
 			float s = topleft(0) * a(0) + topleft(1) * a(1);
+			vec3 topright = base(right, top);
 			float t = topright(0) * b(0) + topright(1) * b(1);
+			vec3 bottomleft = base(left, bottom);
 			float u = bottomleft(0) * d(0) + bottomleft(1) * d(1);
+			vec3 bottomright = base(right, bottom);
 			float v = bottomright(0) * c(0) + bottomright(1) * c(1);
 
 			float fx = f(dx);
@@ -103,34 +104,34 @@ RGBImage BuildNoiseImage(int width, int height)
 			float uv = mix(u, v, fx);
 			float noise = mix(st, uv, fy);
 
-//			base(i,j) = vec3(noise, noise, noise);
+			//		base(i,j) = vec3(noise, noise, noise);
 			noiseArray[i][j] = noise;
 		}
-
-	for (int i = 0; i < height; i++)
-	{
-		for (int j = 0; j < width; j++)
-		{
-			float value = fBm(vec2(i, j), 1, 2, 50, width);
-			base(j,i) = vec3(value, value, value);
-		}
 	}
+	for (int i = 0; i < base.rows(); i++)
+		for (int j = 0; j < base.cols(); j++)
+		{
+			float value = fBm(vec3(j, i,0), 0.6, 2, 16);
+			base(j, i) = vec3(value, value, value);
+		}
+	
+
 
 	return base;
 }
 
-float fBm(vec2 point, float H, int lacunarity, int octaves, int max)
+float fBm(vec3 point, float H, int lacunarity, int octaves)
 {
 	float value, frequency, remainder; 
 	int i;
 	static bool first = true;
-	static float exp_array[MAX_OCTAVES]; //TODO: define MAX_OCTAVES
+	static float exp_array[MAX_OCTAVES]; 
 
 	if (first)
 	{
 		frequency = 0.2;
 
-		for (i = 0; i< MAX_OCTAVES; i++) //TODO: define MAX_OCTAVES
+		for (i = 0; i< MAX_OCTAVES; i++) 
 		{ /* compute weight for each frequency */
 			exp_array[i] = pow(frequency, -H);
 			frequency *= lacunarity;
@@ -143,14 +144,13 @@ float fBm(vec2 point, float H, int lacunarity, int octaves, int max)
 	/* inner loop of spectral construction */ 
 	for (i = 0; i < octaves; i++)
 	{
-		if (point.x() <= max && point.y() <= max)
-			value += noiseArray[int(point.x())][int(point.y())]  *exp_array[i];
-		point.x() *= lacunarity; point.y() *= lacunarity; //point.z() *= lacunarity;
+		value += noiseArray[int(point.x()) % FBM_SIZE][int(point.y()) % FBM_SIZE] * exp_array[i];
+		point.x() *= lacunarity; point.y() *= lacunarity;// point.z() *= lacunarity;
 	} /* for */
 
 	remainder = octaves - (int)octaves;
 	if (remainder) /* add in "octaves" remainder */ /* "i" and spatial freq. are preset in loop above */
-		value += remainder * noiseArray[int(point.x())][int(point.y())] * exp_array[i];
+		value += remainder * noiseArray[int(point.x()) / FBM_SIZE][int(point.y()) / FBM_SIZE] * exp_array[i];
 
 	return value;
 }
@@ -215,14 +215,6 @@ void init(int width, int height)
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo_vpointTerrain);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vec3)*triangle_vec.size(), &triangle_vec[0], GL_STATIC_DRAW);
 
-	///--- Normal Buffer
-	/*For every triangle of the mesh
-    Compute the triangle normal by the cross-product of the triangle edges
-    Add the computed normal to each of the triangle's vertices
-
-	For every vertex of the mesh
-    Normalize the vertex normal*/
-
 	///--- Attribute
 	GLuint vpoint_id = glGetAttribLocation(_pid, "vpoint");
 	glEnableVertexAttribArray(vpoint_id);
@@ -279,7 +271,7 @@ void init(int width, int height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glUniform1i(glGetUniformLocation(_pid, "tex_water"), 5 /*GL_TEXTURE5*/);
 
-	RGBImage Noise = BuildNoiseImage(512,512); //lets give this some different dimensions
+	RGBImage Noise = BuildNoiseImage(FBM_SIZE, FBM_SIZE); //lets give this some different dimensions
 
 	//vertex buffer for heightmap texture
 	{

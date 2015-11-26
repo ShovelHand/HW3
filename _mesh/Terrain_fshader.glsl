@@ -18,7 +18,7 @@ uniform sampler2D tex_height;
 void main() {
 	vec3 L = vec3(1,2,0); //light position
 	vec3 N = fpoint;
-	float lamb = dot( L, N );
+	float lamb = dot( N, L );
 	lamb /= 10;
 	vec3 grass = texture(tex_grass, uv).rgb;
     vec3 rock = texture(tex_rock, uv).rgb;
@@ -36,7 +36,7 @@ void main() {
 		color = texture(tex_sand, uv).rgb;
 		*/
 //	color = texture(tex_grass,vec2(uv)).rgb* lamb;
-	color = texture(tex_height, TexCoord0.st).rgb* lamb;
+	color = texture(tex_height, TexCoord0.st).rgb;
 	
 
 }

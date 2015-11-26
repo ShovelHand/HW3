@@ -18,7 +18,6 @@ uniform mat4 M;
 
 uniform sampler2D tex_height;
 float tex_at(vec2 uv){ return texture(tex_height,uv).r; }
-float scalar = 6;
 
 void main() {          
     fpoint = vpoint + .5; ///< For coloring Debug [0,1]^3 
