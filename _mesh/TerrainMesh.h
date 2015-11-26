@@ -11,7 +11,7 @@ typedef Eigen::Transform<float, 3, Eigen::Affine> Transform;
 #define FBM_SIZE 512
 
 class TerrainMesh{
-private:
+public:
 	GLuint _vao; ///< vertex array object
 	GLuint _pid; ///< GLSL shader program ID 
 	GLuint _vbo_vpointTerrain; ///< memory buffer
@@ -24,15 +24,13 @@ private:
 	GLuint _tex_water; ///< Texture ID
 	GLuint _tex_uvDebug; ///< Texture ID
 	GLuint _tex_heightMap;
-
-	opengp::Surface_mesh mesh;
 	GLuint _vnormal;   ///< memory buffer
 	
 	std::vector<vec3> vertices;
 	std::vector<vec3> triangle_vec; //defines the order in which vertices are used in the triangle strips
-	std::vector<vec2> vtexcoord;
-//	std::vector<float> noiseVec;
-	float noiseArray[600][600];
+	std::vector<vec2> vtexcoord;  //texture coords for height map. Covers whole mesh
+	float noiseArray[FBM_SIZE][FBM_SIZE];  //stores base perlin noise for fBm function
+
 	/*Perlin noise helper functions*/
 float mix(float x, float y, float alpha)
 {
@@ -50,13 +48,13 @@ float rand0_1()
 	return ((float)std::rand()) / ((float)RAND_MAX);
 }
 
-
 //Make the perlin noise image to upload as texture
 RGBImage BuildNoiseImage(int width, int height)
 {
 	RGBImage base(width, height);
+	RGBImage result(width, height);
 	//set vertex heights using Perlin noise
-	int period = 64;
+	int period = 80;
 	float frequency = 1.0f / period;
 	std::srand(19);
 	vec3 randGradientVec;
@@ -104,20 +102,19 @@ RGBImage BuildNoiseImage(int width, int height)
 			float uv = mix(u, v, fx);
 			float noise = mix(st, uv, fy);
 
-			//		base(i,j) = vec3(noise, noise, noise);
-			noiseArray[i][j] = noise;
+				//	result(i,j) = vec3(noise, noise, noise);
+			noiseArray[i][j] = noise;	
 		}
 	}
+
 	for (int i = 0; i < base.rows(); i++)
 		for (int j = 0; j < base.cols(); j++)
 		{
-			float value = fBm(vec3(j, i,0), 0.6, 2, 16);
-			base(j, i) = vec3(value, value, value);
+			float value = fBm(vec3(j, i,0), 0.4, 2, 8);
+			result(j, i) = vec3(value, value, value);
 		}
 	
-
-
-	return base;
+	return result;
 }
 
 float fBm(vec3 point, float H, int lacunarity, int octaves)
@@ -220,9 +217,6 @@ void init(int width, int height)
 	glEnableVertexAttribArray(vpoint_id);
 	glVertexAttribPointer(vpoint_id, 3, GL_FLOAT, DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
 
-	glUniform1i(glGetUniformLocation(_pid, "width"), width);
-	glUniform1i(glGetUniformLocation(_pid, "depth"), height);
-
 	///--- Load texture grass
 	glGenTextures(1, &_tex_grass);
 	glBindTexture(GL_TEXTURE_2D, _tex_grass);
@@ -295,8 +289,8 @@ void init(int width, int height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, Noise.cols(),
-		Noise.rows(), 0, GL_RGB, GL_FLOAT,
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, Noise.rows(),
+		Noise.cols(), 0, GL_RGB, GL_FLOAT,
 		Noise.data());
 	
 	///--- to avoid the current object being polluted
