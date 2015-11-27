@@ -7,6 +7,9 @@ uniform float time;
 
 in vec2 uv;
 
+uniform mat4 MODEL;
+uniform mat4 VIEW;
+
 uniform sampler2D tex_grass;
 uniform sampler2D tex_rock;
 uniform sampler2D tex_debug;
@@ -16,27 +19,33 @@ uniform sampler2D tex_water;
 uniform sampler2D tex_height;
 
 void main() {
-	vec3 L = vec3(1,2,0); //light position
-	vec3 N = fpoint;
-	float lamb = dot( N, L );
-	lamb /= 10;
+//get normal for fragment 
+	float dx_p = textureOffset(tex_height, TexCoord0.st, ivec2(+1,0))[0];
+	float dx_m = textureOffset(tex_height, TexCoord0.st, ivec2(-1,0))[0];
+	float dy_p = textureOffset(tex_height, TexCoord0.st, ivec2(0,+1))[0];
+	float dy_m = textureOffset(tex_height, TexCoord0.st, ivec2(0,-1))[0];
+	
+	vec3 dx = normalize(vec3(1,0.0,dx_p - dx_m));
+	vec3 dy = normalize(vec3(1,0.0,dy_p - dy_m));
+	vec3 surfaceNorm = vec3(cross(dx,dy));
+
+	//rotate normal appropriately
+	surfaceNorm =  inverse( transpose( mat3(MODEL) ))*surfaceNorm;
+
+//light
+	vec3 L = vec3(2,3,20); //light position
+	float intensity = 1;
+	float light = max(dot(surfaceNorm, normalize(L))*intensity, 0.0);
+
 	vec3 grass = texture(tex_grass, uv).rgb;
     vec3 rock = texture(tex_rock, uv).rgb;
 	vec3 debug = texture(tex_debug, uv).rgb;
 	vec3 sand = texture(tex_sand, uv).rgb;
 	
-	/*
-	if(fpoint.y > 3)
-		color = texture(tex_snow, uv).rgb;
-    if(fpoint.y > 0.8  && fpoint.y <3)
-		color = mix(grass/2, rock, max(lamb,0));
-	else if(fpoint.y > 0.2 && fpoint.y <=0.8)
-		color = texture(tex_grass, uv).rgb;
-	else if(fpoint.y <= 0.2 )
-		color = texture(tex_sand, uv).rgb;
-		*/
-//	color = texture(tex_grass,vec2(uv)).rgb* lamb;
-	color = texture(tex_height, TexCoord0.st).rgb;
+//	color = texture(tex_grass,vec2(uv)).rgb*light;
+//	color = texture(tex_height, TexCoord0.st).rgb*light;
+	color = vec3(0.6,0.6,0.6)*light;
+
 	
 
 }

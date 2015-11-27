@@ -1,5 +1,5 @@
 #version 330 core 
-uniform float time;
+//uniform float time;
 in vec3 vpoint;
 in vec2 TexCoord;
 out vec2 TexCoord0;

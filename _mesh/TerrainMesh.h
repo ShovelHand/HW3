@@ -54,7 +54,7 @@ RGBImage BuildNoiseImage(int width, int height)
 	RGBImage base(width, height);
 	RGBImage result(width, height);
 	//set vertex heights using Perlin noise
-	int period = 80;
+	int period = 100;
 	float frequency = 1.0f / period;
 	std::srand(19);
 	vec3 randGradientVec;
@@ -103,14 +103,14 @@ RGBImage BuildNoiseImage(int width, int height)
 			float noise = mix(st, uv, fy);
 
 				//	result(i,j) = vec3(noise, noise, noise);
-			noiseArray[i][j] = noise;	
+			noiseArray[i][j] = noise*2;	
 		}
 	}
 
 	for (int i = 0; i < base.rows(); i++)
 		for (int j = 0; j < base.cols(); j++)
 		{
-			float value = fBm(vec3(j, i,0), 0.4, 2, 8);
+			float value = fBm(vec3(j, i,0), 0.4, 2, 6)*1.5;
 			result(j, i) = vec3(value, value, value);
 		}
 	
@@ -284,7 +284,7 @@ void init(int width, int height)
 	
 	glUniform1i(glGetUniformLocation(_pid, "tex_height"), 6 /*GL_TEXTURE6*/);
 	glBindTexture(GL_TEXTURE_2D, _tex_heightMap);
-//	glfwLoadTexture2D("_mesh/texture.tga", 0);
+//	glfwLoadTexture2D("_mesh/blacknwhitefbm.tga", 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -328,15 +328,14 @@ void draw()
 	glActiveTexture(GL_TEXTURE6);
 	glBindTexture(GL_TEXTURE_2D, _tex_heightMap);
 
-	glUniform1f(glGetUniformLocation(_pid, "time"), glfwGetTime());
+	glUniform1f(glGetUniformLocation(_pid, "time"), glfwGetTime()); 
 
-
-	///--- Upload transformation
-	Transform M = Transform::Identity();
-	//could scale the mesh to make it look less blocky.
-//	M *= Eigen::AlignedScaling3f(0.1, 0.1, 0.1);
-	GLuint M_id = glGetUniformLocation(_pid, "M");
-	glUniformMatrix4fv(M_id, ONE, DONT_TRANSPOSE, M.data());
+//	///--- Upload transformation
+//	Transform M = Transform::Identity();
+//	//could scale the mesh to make it look less blocky.
+////	M *= Eigen::AlignedScaling3f(0.1, 0.1, 0.1);
+//	GLuint M_id = glGetUniformLocation(_pid, "M");
+//	glUniformMatrix4fv(M_id, ONE, DONT_TRANSPOSE, M.data());
 	
 
 	glDrawArrays(GL_TRIANGLES, 0, triangle_vec.size());  //uncomment to see the mesh drawn as triangle strips
@@ -364,15 +363,15 @@ private:
 
 		}
 
-		/////--- Vertex Attribute ID for Normals
-		GLint vnormal_id = glGetAttribLocation(_pid, "vnormal");
-		if (vnormal_id >= 0) {
-			glEnableVertexAttribArray(vnormal_id);
-			glBindBuffer(GL_ARRAY_BUFFER, _vnormal);
-			glVertexAttribPointer(vnormal_id, 3 /*vec3*/, GL_FLOAT, DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
-			check_error_gl();
+		///////--- Vertex Attribute ID for Normals
+		//GLint vnormal_id = glGetAttribLocation(_pid, "vnormal");
+		//if (vnormal_id >= 0) {
+		//	glEnableVertexAttribArray(vnormal_id);
+		//	glBindBuffer(GL_ARRAY_BUFFER, _vnormal);
+		//	glVertexAttribPointer(vnormal_id, 3 /*vec3*/, GL_FLOAT, DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
+		//	check_error_gl();
 
-		}
+		//}
 	}
 
 	void unbindShader() {
