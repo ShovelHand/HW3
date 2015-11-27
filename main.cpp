@@ -35,12 +35,6 @@ void RotateY(vec3 *dir, float rot)
 {
 	float cosPhi = (float)cos(rot);
 	float sinPhi = (float)sin(rot);
-
-	//mat3 m;
-	//m(0) = (cosPhi, 0.0, sinPhi);
-	//m(1) = (0.0, 1.0, 0.0);
-	//m(2) = (-sinPhi, 0.0, cosPhi);
-	//big pedantic mess of assignments 'cause I can't use eigen properly.
 	float xnew = 0;
 	xnew += (*dir).x()*cosPhi;
 	xnew += (*dir).z() * sinPhi;
@@ -159,7 +153,7 @@ void init(){
     glEnable(GL_DEPTH_TEST);
 //    mesh.init();
 	terrain.init(500, 500);
-	skybox.init(20, 20);
+	skybox.init(700, 700);
 
 	//setup viewing matrices;
 	MODEL = mat4::Identity();
@@ -171,18 +165,19 @@ void display(){
     opengp::update_title_fps("Assignment 3 and 4");   
     glViewport(0,0,window_width,window_height);    
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
 
+
+	glUseProgram(0);
 	//viewing matrices	
 	GLuint pid = terrain.getProgramID();
 	glUseProgram(pid);
 	glUniformMatrix4fv(glGetUniformLocation(pid, "MODEL"), 1, GL_FALSE, MODEL.data());
 	glUniformMatrix4fv(glGetUniformLocation(pid, "VIEW"), 1, GL_FALSE, VIEW.data());
 	glUniformMatrix4fv(glGetUniformLocation(pid, "PROJ"), 1, GL_FALSE, PROJ.data());
-	glUseProgram(pid);
-
 	terrain.draw();
+	glUseProgram(0);
 //	skybox.draw();
-//	mesh.draw();
 }
 
 void cleanup(){}

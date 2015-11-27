@@ -330,17 +330,7 @@ void draw()
 
 	glUniform1f(glGetUniformLocation(_pid, "time"), glfwGetTime()); 
 
-//	///--- Upload transformation
-//	Transform M = Transform::Identity();
-//	//could scale the mesh to make it look less blocky.
-////	M *= Eigen::AlignedScaling3f(0.1, 0.1, 0.1);
-//	GLuint M_id = glGetUniformLocation(_pid, "M");
-//	glUniformMatrix4fv(M_id, ONE, DONT_TRANSPOSE, M.data());
-	
-
 	glDrawArrays(GL_TRIANGLES, 0, triangle_vec.size());  //uncomment to see the mesh drawn as triangle strips
-	
-//	glDrawArraysInstanced(GL_LINE_LOOP, 0, triangle_vec.size() -1, 3);  //uncomment to see the mesh in wireframe
 
 	 unbindShader();
 }
@@ -351,36 +341,13 @@ private:
 		glBindVertexArray(_vao);
 		check_error_gl();
 
-		/////--- Vertex Attribute ID for Positions
-		GLint vpoint_id = glGetAttribLocation(_pid, "_vbo_vpointTerrain");
-		if (vpoint_id >= 0) {
-			glEnableVertexAttribArray(_vbo_vpointTerrain);
-			check_error_gl();
-			glGenBuffers(1, &_vbo_vpointTerrain);
-			glBindBuffer(GL_ARRAY_BUFFER, _vbo_vpointTerrain);
-			glVertexAttribPointer(vpoint_id, 3 /*vec3*/, GL_FLOAT, DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
-			check_error_gl();
-
-		}
-
-		///////--- Vertex Attribute ID for Normals
-		//GLint vnormal_id = glGetAttribLocation(_pid, "vnormal");
-		//if (vnormal_id >= 0) {
-		//	glEnableVertexAttribArray(vnormal_id);
-		//	glBindBuffer(GL_ARRAY_BUFFER, _vnormal);
-		//	glVertexAttribPointer(vnormal_id, 3 /*vec3*/, GL_FLOAT, DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
-		//	check_error_gl();
-
-		//}
 	}
 
 	void unbindShader() {
 		GLint vpoint_id = glGetAttribLocation(_pid, "_vbo_vpointTerrain");
 		if (vpoint_id >= 0)
 			glDisableVertexAttribArray(vpoint_id);
-		GLint vnormal_id = glGetAttribLocation(_pid, "vnormal");
-//		if (vnormal_id >= 0)
-		//	glDisableVertexAttribArray(vnormal_id);
+
 		glUseProgram(0);
 		glBindVertexArray(0);
 	}
