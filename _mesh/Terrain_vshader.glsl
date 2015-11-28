@@ -11,6 +11,7 @@ out float vheight;
 out vec2 uv;
 
 ///--- Uploaded by Eigen in C++
+uniform mat4 CAMERA;
 uniform mat4 MODEL;
 uniform mat4 VIEW;
 uniform mat4 PROJ;

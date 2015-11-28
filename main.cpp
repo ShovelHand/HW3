@@ -24,7 +24,9 @@ const double RadPerPixel = 0.01;
 const double MovePerPixel = 0.001;
 int lastx; int lasty;
 
-vec3 dirVec(-0.8607, 1.1486, -2.177);
+//vectors used for camera matrix transforms
+vec3 dirVec(3.51, 0.58, 1.36);  //camera orientation
+vec3 eye(1.56, 0.85, 0.48);				//camera translation in world space
 
 //Viewing matrices
 mat4 VIEW;
@@ -48,23 +50,6 @@ void RotateY(vec3 *dir, float rot)
 	(*dir).x() = xnew; (*dir).y() = ynew; (*dir).z() = znew;
 }
 
-void RotateZ(vec3 *dir, float rot)
-{
-	double cosPhi = (double)cos(rot);
-	double sinPhi = (double)sin(rot);
-//need to learn proper way to mult vec3 by matrix
-	float xnew = 0;
-	xnew += (*dir).x()*cosPhi;
-	xnew += (*dir).y() * -sinPhi;
-	float ynew = 0;
-	ynew += (*dir).x() * sinPhi;
-	ynew += (*dir).y() * cosPhi;
-	float znew = 0;
-	znew += (*dir).z() * 1;
-
-	(*dir).x() = xnew; (*dir).y() = ynew; (*dir).z() = znew;
-
-}
 void RotateX(vec3 *dir, float rot)
 {
 	double cosPhi = (double)cos(rot);
@@ -80,20 +65,19 @@ void RotateX(vec3 *dir, float rot)
 	znew += (*dir).z() * cosPhi;
 
 	(*dir).x() = xnew; (*dir).y() = ynew; (*dir).z() = znew;
-
 }
+
 void CamRotate(int xnew, int ynew, int xold, int yold)
 {
 	float XRot = (ynew - yold) * RadPerPixel;
 	float YRot = (xnew - xold) * RadPerPixel;
-//	float ZRot = (ynew - yold) * RadPerPixel;
 	RotateX(&dirVec, XRot);
 	RotateY(&dirVec, YRot);
-//	RotateZ(&dirVec, ZRot);
-	VIEW = Eigen::lookAt(dirVec, vec3(0, 0, 0), vec3(0, 1, 0));
+	VIEW = Eigen::lookAt(eye, dirVec, vec3(0, 1, 0));
 	lastx = xnew; lasty = ynew;
 }
 
+//this is very poorly executed right now, and you should feel bad about writing it.
 void CamZoom(int xnew, int ynew, int xold, int yold)
 {
 	float length = sqrt(dirVec.x() * dirVec.x() + dirVec.y() * dirVec.y());
@@ -130,7 +114,7 @@ void selection_button(int button, int action)
 		{
 			rotating = true;
 			glfwGetMousePos(&lastx, &lasty);
-		}	
+		}
 	}
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
 		rotating = false;
@@ -149,23 +133,23 @@ void selection_button(int button, int action)
 
 void init(){
 
-    glClearColor(0.5,0.5,0.5, /*solid*/1.0 );    
-    glEnable(GL_DEPTH_TEST);
-//    mesh.init();
+	glClearColor(0.5, 0.5, 0.5, /*solid*/1.0);
+	glEnable(GL_DEPTH_TEST);
+	//    mesh.init();
 	terrain.init(500, 500);
 	skybox.init(700, 700);
 
 	//setup viewing matrices;
 	MODEL = mat4::Identity();
-	VIEW = Eigen::lookAt(dirVec, vec3(0, 0, 0), vec3(0, 1, 0));
+	VIEW = Eigen::lookAt(eye, dirVec, vec3(0, 1, 0));
 	PROJ = Eigen::perspective(45.0f, window_width / (float)window_height, 0.1f, 100.0f);
 }
 
 void display(){
-    opengp::update_title_fps("Assignment 3 and 4");   
-    glViewport(0,0,window_width,window_height);    
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
+	opengp::update_title_fps("Assignment 3 and 4");
+	glViewport(0, 0, window_width, window_height);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 
 
 	glUseProgram(0);
@@ -177,33 +161,47 @@ void display(){
 	glUniformMatrix4fv(glGetUniformLocation(pid, "PROJ"), 1, GL_FALSE, PROJ.data());
 	terrain.draw();
 	glUseProgram(0);
-//	skybox.draw();
+	//	skybox.draw();
 }
 
 void cleanup(){}
 
 void keyboard(int key, int action){
-    if(action != GLFW_PRESS) return; ///< only act on release
-    switch(key){
-        case '0': break;
-		case 'w': case 'W':
-			printf("%f, %f, %f", dirVec.x(), dirVec.y(), dirVec.z());
-			break;
-			
-        default: break;
-    }
+	if(action != GLFW_PRESS) return; ///< only act on PRESS
+	float delta = 0.1;  ///the step amount for wasd
+	vec3 xaxis = dirVec.cross(vec3(0, 1, 0)).normalized();
+	switch (key){
+	case '0': break;
+	case 'w': case 'W':
+		eye  += dirVec.normalized();
+		break;
+	case 's': case 'S':
+		eye -= dirVec.normalized();
+		break;
+	case 'a': case 'A':
+		eye -= xaxis*delta;
+		break;
+	case 'd': case 'D':
+		eye += xaxis*delta;
+		break;
+	case 'i': case 'I':
+		printf("eye = %f, %f, %f dirVec = %f, %f, %f \n", eye.x(), eye.y(), eye.z(), dirVec.x(), dirVec.y(), dirVec.z());
+		break;
+	default: break;
+	}
+	VIEW = Eigen::lookAt(eye, dirVec, vec3(0, 1, 0));
 }
 
 int main(int, char**){
-    glfwInitWindowSize(window_width, window_height);
-    glfwCreateWindow();
-    glfwDisplayFunc(display);
+	glfwInitWindowSize(window_width, window_height);
+	glfwCreateWindow();
+	glfwDisplayFunc(display);
 	glfwSetMouseButtonCallback(selection_button);
 	glfwSetMousePosCallback(mousemove);
-    glfwSetKeyCallback(keyboard);
-    init();
-    keyboard(GLFW_KEY_KP_1, 0);
-    glfwMainLoop();
-    cleanup();
-    return EXIT_SUCCESS;
+	glfwSetKeyCallback(keyboard);
+	init();
+	keyboard(GLFW_KEY_KP_1, 0);
+	glfwMainLoop();
+	cleanup();
+	return EXIT_SUCCESS;
 }
