@@ -1,5 +1,5 @@
 #version 330 core
-out vec3 color;
+out vec4 color;
 in vec3 fpoint;
 in vec3 fnormal_cam;
 uniform float time;
@@ -34,6 +34,6 @@ void main() {
 
 
 
-	color = texture(tex_water, uv).rgb;
-	
+	color.rgb = texture(tex_water, uv).rgb;
+	color.a = 0.5;
 }

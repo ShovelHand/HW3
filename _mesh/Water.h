@@ -96,9 +96,10 @@ public:
 		glActiveTexture(GL_TEXTURE5);
 
 		glUniform1f(glGetUniformLocation(_pid, "time"), glfwGetTime()); //will be used for water ripples.
-
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA);
+		glEnable(GL_BLEND);
 		glDrawArrays(GL_TRIANGLES, 0, triangle_vec.size());  //uncomment to see the mesh drawn as triangle strips
-
+		glDisable(GL_BLEND);
 		GLint vpoint_id = glGetAttribLocation(_pid, "_vbo_vpointWater");
 		if (vpoint_id >= 0)
 			glDisableVertexAttribArray(vpoint_id);

@@ -8,7 +8,7 @@
 
 using namespace EigenVisualizer;
 
-int window_width = 640;
+int window_width = 1280;
 int window_height = 640;
 
 Mesh mesh;
@@ -155,14 +155,7 @@ void display(){
 
 
 	GLuint pid;
-	glUseProgram(0);
-	//viewing matrices	
-	pid = water.getProgramID();
-	glUseProgram(pid);
-	glUniformMatrix4fv(glGetUniformLocation(pid, "MODEL"), 1, GL_FALSE, MODEL.data());
-	glUniformMatrix4fv(glGetUniformLocation(pid, "VIEW"), 1, GL_FALSE, VIEW.data());
-	glUniformMatrix4fv(glGetUniformLocation(pid, "PROJ"), 1, GL_FALSE, PROJ.data());
-	water.draw();
+
 	glUseProgram(0);
 	pid = terrain.getProgramID();
 	glUseProgram(pid);
@@ -171,6 +164,14 @@ void display(){
 	glUniformMatrix4fv(glGetUniformLocation(pid, "PROJ"), 1, GL_FALSE, PROJ.data());
 	
 	terrain.draw();
+	glUseProgram(0);
+	//viewing matrices	
+	pid = water.getProgramID();
+	glUseProgram(pid);
+	glUniformMatrix4fv(glGetUniformLocation(pid, "MODEL"), 1, GL_FALSE, MODEL.data());
+	glUniformMatrix4fv(glGetUniformLocation(pid, "VIEW"), 1, GL_FALSE, VIEW.data());
+	glUniformMatrix4fv(glGetUniformLocation(pid, "PROJ"), 1, GL_FALSE, PROJ.data());
+	water.draw();
 	glUseProgram(0);
 	//	skybox.draw();
 }

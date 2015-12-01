@@ -51,8 +51,9 @@ void main() {
 		color = mix(grass, rock, vheight);
 	else if(vheight >= 2)
 		color = mix(rock,snow,vheight/2);
-	color *= light;
-
+		if (light < 0.1) light = 0.1; 
+				color *= light;		 
+		
 
 //	color = texture(tex_height, TexCoord0.st).rgb*light;
 	
