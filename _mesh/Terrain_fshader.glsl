@@ -31,11 +31,11 @@ void main() {
 	vec3 surfaceNorm = vec3(cross(dx,dy));
 
 	//rotate normal appropriately
-//	surfaceNorm =  inverse( transpose( mat3(MODEL) ))*surfaceNorm;
+	//surfaceNorm =  inverse( transpose( mat3(MODEL) ))*surfaceNorm;
 
 //light
-	vec3 L = vec3(10,10,10); //light position
-	float intensity = 1;
+	vec3 L = vec3(0,5000,500); //light position
+	float intensity = 10;
 	float light = max(dot(surfaceNorm, normalize(L))*intensity, 0.0);
 
 	//calculate texture blend based on height and slope
@@ -45,13 +45,13 @@ void main() {
 	vec3 sand = texture(tex_sand, uv).rgb;
 	vec3 snow = texture(tex_snow, uv).rgb;
 
-	if(vheight < 0.0)
+	if(vheight < -0.3)
 		color = mix(sand, grass, vheight*1.5);
-	else if(vheight >=0.0 && vheight < 2)
+	else if(vheight >=-0.3 && vheight < 2)
 		color = mix(grass, rock, vheight);
 	else if(vheight >= 2)
 		color = mix(rock,snow,vheight/2);
-//	color *= light;
+	color *= light;
 
 
 //	color = texture(tex_height, TexCoord0.st).rgb*light;

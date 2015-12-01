@@ -26,7 +26,8 @@ void main() {
 
 	vheight =  tex_at(TexCoord);
 
-    gl_Position = PROJ * VIEW * MODEL * vec4(vpoint.x, vheight, vpoint.z, 1.0);
+//    gl_Position = PROJ * VIEW * MODEL * vec4(vpoint.x, vheight, vpoint.z, 1.0);
+	gl_Position = PROJ * VIEW *  vec4(vpoint.x, vheight, vpoint.z, 1.0);
 	TexCoord0 = TexCoord;
     uv = vec2(fpoint.x, fpoint.z);
 }

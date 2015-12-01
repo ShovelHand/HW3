@@ -2,6 +2,7 @@
 #include "_mesh/Mesh.h"
 #include "_mesh/TerrainMesh.h"
 #include "_mesh/Skybox.h"
+#include "_mesh/Water.h"
 
 #include "OpenGLImage/EigenVisualizer.h"
 
@@ -13,6 +14,7 @@ int window_height = 640;
 Mesh mesh;
 TerrainMesh terrain;
 Skybox skybox;
+Water water;
 
 typedef Eigen::Transform<float, 3, Eigen::Affine> Transform;
 
@@ -25,8 +27,8 @@ const double MovePerPixel = 0.001;
 int lastx; int lasty;
 
 //vectors used for camera matrix transforms
-vec3 dirVec(3.51, 0.58, 1.36);  //camera orientation
-vec3 eye(1.56, 0.85, 0.48);				//camera translation in world space
+vec3 dirVec(100, 0, 100);  //camera orientation
+vec3 eye(0, 8, 0);				//camera translation in world space
 
 //Viewing matrices
 mat4 VIEW;
@@ -138,11 +140,12 @@ void init(){
 	//    mesh.init();
 	terrain.init(500, 500);
 	skybox.init(700, 700);
+	water.init(500, 500);
 
 	//setup viewing matrices;
 	MODEL = mat4::Identity();
 	VIEW = Eigen::lookAt(eye, dirVec, vec3(0, 1, 0));
-	PROJ = Eigen::perspective(45.0f, window_width / (float)window_height, 0.1f, 100.0f);
+	PROJ = Eigen::perspective(45.0f, window_width / (float)window_height, 0.1f, 200.0f);
 }
 
 void display(){
@@ -151,14 +154,22 @@ void display(){
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-
+	GLuint pid;
 	glUseProgram(0);
 	//viewing matrices	
-	GLuint pid = terrain.getProgramID();
+	pid = water.getProgramID();
 	glUseProgram(pid);
 	glUniformMatrix4fv(glGetUniformLocation(pid, "MODEL"), 1, GL_FALSE, MODEL.data());
 	glUniformMatrix4fv(glGetUniformLocation(pid, "VIEW"), 1, GL_FALSE, VIEW.data());
 	glUniformMatrix4fv(glGetUniformLocation(pid, "PROJ"), 1, GL_FALSE, PROJ.data());
+	water.draw();
+	glUseProgram(0);
+	pid = terrain.getProgramID();
+	glUseProgram(pid);
+	glUniformMatrix4fv(glGetUniformLocation(pid, "MODEL"), 1, GL_FALSE, MODEL.data());
+	glUniformMatrix4fv(glGetUniformLocation(pid, "VIEW"), 1, GL_FALSE, VIEW.data());
+	glUniformMatrix4fv(glGetUniformLocation(pid, "PROJ"), 1, GL_FALSE, PROJ.data());
+	
 	terrain.draw();
 	glUseProgram(0);
 	//	skybox.draw();
@@ -167,22 +178,22 @@ void display(){
 void cleanup(){}
 
 void keyboard(int key, int action){
-	if(action != GLFW_PRESS) return; ///< only act on PRESS
-	float delta = 0.1;  ///the step amount for wasd
-	vec3 xaxis = dirVec.cross(vec3(0, 1, 0)).normalized();
+	if(action != GLFW_PRESS && action != 2) return; ///< only act on PRESS
+	float delta = 0.02;  ///the step amount for wasd
+	vec3 xaxis = dirVec.normalized().cross(vec3(0, 1, 0));
 	switch (key){
 	case '0': break;
 	case 'w': case 'W':
-		eye  += dirVec.normalized();
+		eye  += dirVec*delta;
 		break;
 	case 's': case 'S':
-		eye -= dirVec.normalized();
+		eye -= dirVec*delta;
 		break;
 	case 'a': case 'A':
-		eye -= xaxis*delta;
+		eye -= xaxis;
 		break;
 	case 'd': case 'D':
-		eye += xaxis*delta;
+		eye += xaxis;
 		break;
 	case 'i': case 'I':
 		printf("eye = %f, %f, %f dirVec = %f, %f, %f \n", eye.x(), eye.y(), eye.z(), dirVec.x(), dirVec.y(), dirVec.z());
