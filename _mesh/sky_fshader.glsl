@@ -4,7 +4,7 @@ in vec2 uv;
 uniform sampler2D skytex;
 
 void main() {
-    color = texture(skytex,uv).rgba;
+    color = vec3(1,1,0).rgb;
 }
 
 

@@ -54,7 +54,7 @@ RGBImage BuildNoiseImage(int width, int height)
 	RGBImage base(width, height);
 	RGBImage result(width, height);
 	//set vertex heights using Perlin noise
-	int period = 100;
+	int period = 64;
 	float frequency = 1.0f / period;
 	std::srand(19);
 	vec3 randGradientVec;

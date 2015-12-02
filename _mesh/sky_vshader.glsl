@@ -13,7 +13,7 @@ uniform mat4 PROJ;
 
 void main() {
  //   gl_Position = M * vec4(vpointSky, 1.0);
-	gl_Position = M * PROJ * VIEW *  vec4(vpointSky.x, vpointSky.y, vpointSky.z, 1.0);
+	gl_Position =  PROJ *  vec4(vpointSky.x, vpointSky.y, vpointSky.z, 1.0);
 
     uv = vtexcoordSky;
 }

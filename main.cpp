@@ -15,7 +15,6 @@ Mesh mesh;
 TerrainMesh terrain;
 Skybox skybox;
 Water water;
-
 typedef Eigen::Transform<float, 3, Eigen::Affine> Transform;
 
 //mouse panning helpers
@@ -79,32 +78,13 @@ void CamRotate(int xnew, int ynew, int xold, int yold)
 	lastx = xnew; lasty = ynew;
 }
 
-//this is very poorly executed right now, and you should feel bad about writing it.
-void CamZoom(int xnew, int ynew, int xold, int yold)
-{
-	float length = sqrt(dirVec.x() * dirVec.x() + dirVec.y() * dirVec.y());
-	float newLength = length + (ynew - yold) * MovePerPixel;
-	if (ynew > yold)
-	{
-		MODEL(0, 3) += 0.2;
-		MODEL(1, 3) += 0.2;
-		MODEL(2, 3) += 0.2;
-	}
-	else if (ynew < yold)
-	{
-		MODEL(0, 3) += -0.2;
-		MODEL(1, 3) += -0.2;
-		MODEL(2, 3) += -0.2;
-	}
-	lastx = xnew; lasty = ynew;
-}
 
 void mousemove(int x, int y)
 {
 	if (rotating)
 		CamRotate(x, y, lastx, lasty);
-	else if (scaling)
-		CamZoom(x, y, lastx, lasty);
+	//else if (scaling)
+	//	CamZoom(x, y, lastx, lasty);
 }
 
 void selection_button(int button, int action)
@@ -139,7 +119,7 @@ void init(){
 	glEnable(GL_DEPTH_TEST);
 	//    mesh.init();
 	terrain.init(500, 500);
-	skybox.init(700, 700);
+//	skybox.init(700, 700);
 	water.init(500, 500);
 
 	//setup viewing matrices;
@@ -152,15 +132,8 @@ void display(){
 	opengp::update_title_fps("Assignment 3 and 4");
 	glViewport(0, 0, window_width, window_height);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
 	GLuint pid;
-	pid = skybox.getProgramID();
-	glUseProgram(pid);
-	glUniformMatrix4fv(glGetUniformLocation(pid, "MODEL"), 1, GL_FALSE, MODEL.data());
-	glUniformMatrix4fv(glGetUniformLocation(pid, "VIEW"), 1, GL_FALSE, VIEW.data());
-	glUniformMatrix4fv(glGetUniformLocation(pid, "PROJ"), 1, GL_FALSE, PROJ.data());
-//	skybox.draw();
+
 	glUseProgram(0);
 	pid = terrain.getProgramID();
 	glUseProgram(pid);
@@ -184,7 +157,7 @@ void display(){
 void cleanup(){}
 
 void keyboard(int key, int action){
-	if(action != GLFW_PRESS && action != GLFW_REPEAT) return; ///< only act on PRESS
+	if (action != GLFW_PRESS && action != GLFW_KEY_REPEAT) return; ///< only act on PRESS	
 	float delta = 0.02;  ///the step amount for wasd
 	vec3 xaxis = dirVec.normalized().cross(vec3(0, 1, 0));
 	switch (key){
@@ -209,6 +182,7 @@ void keyboard(int key, int action){
 		printf("eye = %f, %f, %f dirVec = %f, %f, %f \n", eye.x(), eye.y(), eye.z(), dirVec.x(), dirVec.y(), dirVec.z());
 		break;
 	default: break;
+	
 	}
 	VIEW = Eigen::lookAt(eye, dirVec, vec3(0, 1, 0));
 }
@@ -217,6 +191,7 @@ int main(int, char**){
 	glfwInitWindowSize(window_width, window_height);
 	glfwCreateWindow();
 	glfwDisplayFunc(display);
+	
 	glfwSetMouseButtonCallback(selection_button);
 	glfwSetMousePosCallback(mousemove);
 	glfwSetKeyCallback(keyboard);

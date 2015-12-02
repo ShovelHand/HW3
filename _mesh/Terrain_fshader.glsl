@@ -34,7 +34,7 @@ void main() {
 	//surfaceNorm =  inverse( transpose( mat3(MODEL) ))*surfaceNorm;
 
 //light
-	vec3 L = vec3(0,5000,500); //light position
+	vec3 L = vec3(500,10000,500); //light position
 	float intensity = 10;
 	float light = max(dot(surfaceNorm, normalize(L))*intensity, 0.0);
 
@@ -50,8 +50,8 @@ void main() {
 	else if(vheight >=-0.3 && vheight < 2)
 		color = mix(grass, rock, vheight);
 	else if(vheight >= 2)
-		color = mix(rock,snow,vheight/2);
-		if (light < 0.1) light = 0.1; 
+		color = mix(rock,snow,vheight/3.0);
+		if (light < 0.2) light = 0.2; 
 				color *= light;		 
 		
 
