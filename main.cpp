@@ -155,7 +155,12 @@ void display(){
 
 
 	GLuint pid;
-
+	pid = skybox.getProgramID();
+	glUseProgram(pid);
+	glUniformMatrix4fv(glGetUniformLocation(pid, "MODEL"), 1, GL_FALSE, MODEL.data());
+	glUniformMatrix4fv(glGetUniformLocation(pid, "VIEW"), 1, GL_FALSE, VIEW.data());
+	glUniformMatrix4fv(glGetUniformLocation(pid, "PROJ"), 1, GL_FALSE, PROJ.data());
+//	skybox.draw();
 	glUseProgram(0);
 	pid = terrain.getProgramID();
 	glUseProgram(pid);
@@ -179,22 +184,26 @@ void display(){
 void cleanup(){}
 
 void keyboard(int key, int action){
-	if(action != GLFW_PRESS && action != 2) return; ///< only act on PRESS
+	if(action != GLFW_PRESS && action != GLFW_REPEAT) return; ///< only act on PRESS
 	float delta = 0.02;  ///the step amount for wasd
 	vec3 xaxis = dirVec.normalized().cross(vec3(0, 1, 0));
 	switch (key){
 	case '0': break;
 	case 'w': case 'W':
 		eye  += dirVec*delta;
+		dirVec += dirVec*delta;
 		break;
 	case 's': case 'S':
 		eye -= dirVec*delta;
+		dirVec -= dirVec*delta;
 		break;
 	case 'a': case 'A':
 		eye -= xaxis;
+		dirVec -= xaxis;
 		break;
 	case 'd': case 'D':
 		eye += xaxis;
+		dirVec += xaxis;
 		break;
 	case 'i': case 'I':
 		printf("eye = %f, %f, %f dirVec = %f, %f, %f \n", eye.x(), eye.y(), eye.z(), dirVec.x(), dirVec.y(), dirVec.z());

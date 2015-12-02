@@ -7,7 +7,7 @@ class Skybox{
 private:
 	GLuint _vaoSky; ///< vertex array object
 	GLuint _pid; ///< GLSL shader program ID
-	GLuint _vbo_vpoint; ///< memory buffer
+	GLuint _vbo_vpointSky; ///< memory buffer
 	GLuint _vbo_vtexcoord; ///< memory buffer
 	GLuint _tex; ///< Texture ID
 	GLuint vpoint_id;
@@ -29,57 +29,57 @@ public:
 		///--- Vertex coordinates
 		{
 			float vpoint[] = {
-				-10.0f, 10.0f, -10.0f,
-				-10.0f, -10.0f, -10.0f,
-				10.0f, -10.0f, -10.0f,
-				10.0f, -10.0f, -10.0f,
-				10.0f, 10.0f, -10.0f,
-				-10.0f, 10.0f, -10.0f,
+				-700.0f, 700.0f, -700.0f,
+				-700.0f, -700.0f, -700.0f,
+				700.0f, -700.0f, -700.0f,
+				700.0f, -700.0f, -700.0f,
+				700.0f, 700.0f, -700.0f,
+				-700.0f, 700.0f, -700.0f,
 
-				-10.0f, -10.0f, 10.0f,
-				-10.0f, -10.0f, -10.0f,
-				-10.0f, 10.0f, -10.0f,
-				-10.0f, 10.0f, -10.0f,
-				-10.0f, 10.0f, 10.0f,
-				-10.0f, -10.0f, 10.0f,
+				-700.0f, -700.0f, 700.0f,
+				-700.0f, -700.0f, -700.0f,
+				-700.0f, 700.0f, -700.0f,
+				-700.0f, 700.0f, -700.0f,
+				-700.0f, 700.0f, 700.0f,
+				-700.0f, -700.0f, 700.0f,
 
-				10.0f, -10.0f, -10.0f,
-				10.0f, -10.0f, 10.0f,
-				10.0f, 10.0f, 10.0f,
-				10.0f, 10.0f, 10.0f,
-				10.0f, 10.0f, -10.0f,
-				10.0f, -10.0f, -10.0f,
+				700.0f, -700.0f, -700.0f,
+				700.0f, -700.0f, 700.0f,
+				700.0f, 700.0f, 700.0f,
+				700.0f, 700.0f, 700.0f,
+				700.0f, 700.0f, -700.0f,
+				700.0f, -700.0f, -700.0f,
 
-				-10.0f, -10.0f, 10.0f,
-				-10.0f, 10.0f, 10.0f,
-				10.0f, 10.0f, 10.0f,
-				10.0f, 10.0f, 10.0f,
-				10.0f, -10.0f, 10.0f,
-				-10.0f, -10.0f, 10.0f,
+				-700.0f, -700.0f, 700.0f,
+				-700.0f, 700.0f, 700.0f,
+				700.0f, 700.0f, 700.0f,
+				700.0f, 700.0f, 700.0f,
+				700.0f, -700.0f, 700.0f,
+				-700.0f, -700.0f, 700.0f,
 
-				-10.0f, 10.0f, -10.0f,
-				10.0f, 10.0f, -10.0f,
-				10.0f, 10.0f, 10.0f,
-				10.0f, 10.0f, 10.0f,
-				-10.0f, 10.0f, 10.0f,
-				-10.0f, 10.0f, -10.0f,
+				-700.0f, 700.0f, -700.0f,
+				700.0f, 700.0f, -700.0f,
+				700.0f, 700.0f, 700.0f,
+				700.0f, 700.0f, 700.0f,
+				-700.0f, 700.0f, 700.0f,
+				-700.0f, 700.0f, -700.0f,
 
-				-10.0f, -10.0f, -10.0f,
-				-10.0f, -10.0f, 10.0f,
-				10.0f, -10.0f, -10.0f,
-				10.0f, -10.0f, -10.0f,
-				-10.0f, -10.0f, 10.0f,
-				10.0f, -10.0f, 10.0f
+				-700.0f, -700.0f, -700.0f,
+				-700.0f, -700.0f, 700.0f,
+				700.0f, -700.0f, -700.0f,
+				700.0f, -700.0f, -700.0f,
+				-700.0f, -700.0f, 700.0f,
+				700.0f, -700.0f, 700.0f
 			};
 			///--- Buffer
-			glGenBuffers(1, &_vbo_vpoint);
-			glBindBuffer(GL_ARRAY_BUFFER, _vbo_vpoint);
+			glGenBuffers(1, &_vbo_vpointSky);
+			glBindBuffer(GL_ARRAY_BUFFER, _vbo_vpointSky);
 			glBufferData(GL_ARRAY_BUFFER, 3 * 36 * sizeof(float), &vpoint, GL_STATIC_DRAW);
 
 			///--- Attribute
 			vpoint_id = glGetAttribLocation(_pid, "vpointSky");
 			glEnableVertexAttribArray(vpoint_id);
-		//	glBindBuffer(GL_ARRAY_BUFFER, _vbo_vpoint);
+		//	glBindBuffer(GL_ARRAY_BUFFER, _vbo_vpointSky);
 		//	glVertexAttribPointer(vpoint_id, 3, GL_FLOAT, DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 		}
