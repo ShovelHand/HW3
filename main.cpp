@@ -133,7 +133,7 @@ void display(){
 	glViewport(0, 0, window_width, window_height);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	GLuint pid;
-
+	
 	glUseProgram(0);
 	pid = terrain.getProgramID();
 	glUseProgram(pid);

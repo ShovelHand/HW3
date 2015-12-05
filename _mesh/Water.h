@@ -78,6 +78,7 @@ public:
 		glfwLoadTexture2D("_mesh/water.tga", 0);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glUniform1i(glGetUniformLocation(_pid, "tex_water"), 5 /*GL_TEXTURE5*/);
 
 		///--- to avoid the current object being polluted
