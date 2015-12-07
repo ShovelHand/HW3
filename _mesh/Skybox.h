@@ -29,47 +29,47 @@ public:
 		///--- Vertex coordinates
 		{
 			float vpoint[] = {
-				-10.0f, 10.0f, -10.0f,
-				-10.0f, -10.0f, -10.0f,
-				10.0f, -10.0f, -10.0f,
-				10.0f, -10.0f, -10.0f,
-				10.0f, 10.0f, -10.0f,
-				-10.0f, 10.0f, -10.0f,
+				-195.0f, 195.0f, -195.0f,
+				-195.0f, -195.0f, -195.0f,
+				195.0f, -195.0f, -195.0f,
+				195.0f, -195.0f, -195.0f,
+				195.0f, 195.0f, -195.0f,
+				-195.0f, 195.0f, -195.0f,
 
-				-10.0f, -10.0f, 10.0f,
-				-10.0f, -10.0f, -10.0f,
-				-10.0f, 10.0f, -10.0f,
-				-10.0f, 10.0f, -10.0f,
-				-10.0f, 10.0f, 10.0f,
-				-10.0f, -10.0f, 10.0f,
+				-195.0f, -195.0f, 195.0f,
+				-195.0f, -195.0f, -195.0f,
+				-195.0f, 195.0f, -195.0f,
+				-195.0f, 195.0f, -195.0f,
+				-195.0f, 195.0f, 195.0f,
+				-195.0f, -195.0f, 195.0f,
 
-				10.0f, -10.0f, -10.0f,
-				10.0f, -10.0f, 10.0f,
-				10.0f, 10.0f, 10.0f,
-				10.0f, 10.0f, 10.0f,
-				10.0f, 10.0f, -10.0f,
-				10.0f, -10.0f, -10.0f,
+				195.0f, -195.0f, -195.0f,
+				195.0f, -195.0f, 195.0f,
+				195.0f, 195.0f, 195.0f,
+				195.0f, 195.0f, 195.0f,
+				195.0f, 195.0f, -195.0f,
+				195.0f, -195.0f, -195.0f,
 
-				-10.0f, -10.0f, 10.0f,
-				-10.0f, 10.0f, 10.0f,
-				10.0f, 10.0f, 10.0f,
-				10.0f, 10.0f, 10.0f,
-				10.0f, -10.0f, 10.0f,
-				-10.0f, -10.0f, 10.0f,
+				-195.0f, -195.0f, 195.0f,
+				-195.0f, 195.0f, 195.0f,
+				195.0f, 195.0f, 195.0f,
+				195.0f, 195.0f, 195.0f,
+				195.0f, -195.0f, 195.0f,
+				-195.0f, -195.0f, 195.0f,
 
-				-10.0f, 10.0f, -10.0f,
-				10.0f, 10.0f, -10.0f,
-				10.0f, 10.0f, 10.0f,
-				10.0f, 10.0f, 10.0f,
-				-10.0f, 10.0f, 10.0f,
-				-10.0f, 10.0f, -10.0f,
+				-195.0f, 195.0f, -195.0f,
+				195.0f, 195.0f, -195.0f,
+				195.0f, 195.0f, 195.0f,
+				195.0f, 195.0f, 195.0f,
+				-195.0f, 195.0f, 195.0f,
+				-195.0f, 195.0f, -195.0f,
 
-				-10.0f, -10.0f, -10.0f,
-				-10.0f, -10.0f, 10.0f,
-				10.0f, -10.0f, -10.0f,
-				10.0f, -10.0f, -10.0f,
-				-10.0f, -10.0f, 10.0f,
-				10.0f, -10.0f, 10.0f
+				-195.0f, -195.0f, -195.0f,
+				-195.0f, -195.0f, 195.0f,
+				195.0f, -195.0f, -195.0f,
+				195.0f, -195.0f, -195.0f,
+				-195.0f, -195.0f, 195.0f,
+				195.0f, -195.0f, 195.0f
 			};
 			///--- Buffer
 			glGenBuffers(1, &_vbo_vpoint);
@@ -111,7 +111,7 @@ public:
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glUniform1i(glGetUniformLocation(_pid, "skyTex"), 0 /*GL_TEXTURE0*/);
+		glUniform1i(glGetUniformLocation(_pid, "skyTex"), 7 /*GL_TEXTURE7*/);
 	
 
 		///--- to avoid the current object being polluted
@@ -121,21 +121,26 @@ public:
 
 	void draw()
 	{
-		glDepthMask(GL_FALSE);
+//		glDepthMask(GL_FALSE);
 		glUseProgram(_pid);
 		glBindVertexArray(_vaoSky);
 		check_error_gl();
 
 
 		///--- Bind textures
-		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _tex);
+		glActiveTexture(GL_TEXTURE7);
+
+	//	glUniform1f(glGetUniformLocation(_pid, "time"), glfwGetTime()); //will be used for water ripples.
 		
 		
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	//	glDepthMask(GL_TRUE);
-		
+		GLint vpoint_id = glGetAttribLocation(_pid, "_vbo_vpoint");
+		if (vpoint_id >= 0)
+			glDisableVertexAttribArray(vpoint_id);
 		glDisableVertexAttribArray(vpoint_id);
+		
 		glUseProgram(0);
 		glBindVertexArray(0);
 	}

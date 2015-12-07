@@ -119,7 +119,7 @@ void init(){
 	glEnable(GL_DEPTH_TEST);
 	//    mesh.init();
 	terrain.init(500, 500);
-//	skybox.init(700, 700);
+	skybox.init(700, 700);
 	water.init(500, 500);
 
 	//setup viewing matrices;
@@ -134,15 +134,22 @@ void display(){
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	GLuint pid;
 	
+	pid = skybox.getProgramID();
+	glUseProgram(pid);
+	glUniformMatrix4fv(glGetUniformLocation(pid, "MODEL"), 1, GL_FALSE, MODEL.data());
+	glUniformMatrix4fv(glGetUniformLocation(pid, "VIEW"), 1, GL_FALSE, VIEW.data());
+	glUniformMatrix4fv(glGetUniformLocation(pid, "PROJ"), 1, GL_FALSE, PROJ.data());
+	skybox.draw();
 	glUseProgram(0);
+
 	pid = terrain.getProgramID();
 	glUseProgram(pid);
 	glUniformMatrix4fv(glGetUniformLocation(pid, "MODEL"), 1, GL_FALSE, MODEL.data());
 	glUniformMatrix4fv(glGetUniformLocation(pid, "VIEW"), 1, GL_FALSE, VIEW.data());
 	glUniformMatrix4fv(glGetUniformLocation(pid, "PROJ"), 1, GL_FALSE, PROJ.data());
-	
 	terrain.draw();
 	glUseProgram(0);
+
 	//viewing matrices	
 	pid = water.getProgramID();
 	glUseProgram(pid);
@@ -151,7 +158,6 @@ void display(){
 	glUniformMatrix4fv(glGetUniformLocation(pid, "PROJ"), 1, GL_FALSE, PROJ.data());
 	water.draw();
 	glUseProgram(0);
-	//	skybox.draw();
 }
 
 void cleanup(){}

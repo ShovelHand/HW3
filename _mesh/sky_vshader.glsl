@@ -3,7 +3,7 @@ in vec3 vpointSky;
 in vec2 vtexcoordSky;
 out vec2 uv;
 
-uniform mat4 M;
+//uniform mat4 M;
 ///--- Uploaded by Eigen in C++
 uniform mat4 CAMERA;
 uniform mat4 MODEL;
