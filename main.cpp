@@ -127,7 +127,7 @@ void init(){
 	//setup viewing matrices;
 	MODEL = mat4::Identity();
 	VIEW = Eigen::lookAt(eye, dirVec, vec3(0, 1, 0));
-	PROJ = Eigen::perspective(45.0f, window_width / (float)window_height, 0.1f, 200.0f);
+	PROJ = Eigen::perspective(45.0f, window_width / (float)window_height, 0.1f, 600.0f);
 }
 
 void display(){
@@ -149,7 +149,7 @@ void display(){
 	glUniformMatrix4fv(glGetUniformLocation(pid, "MODEL"), 1, GL_FALSE, MODEL.data());
 	glUniformMatrix4fv(glGetUniformLocation(pid, "VIEW"), 1, GL_FALSE, VIEW.data());
 	glUniformMatrix4fv(glGetUniformLocation(pid, "PROJ"), 1, GL_FALSE, PROJ.data());
-	terrain.draw();
+//	terrain.draw();
 	glUseProgram(0);
 
 	//viewing matrices	
@@ -158,7 +158,7 @@ void display(){
 	glUniformMatrix4fv(glGetUniformLocation(pid, "MODEL"), 1, GL_FALSE, MODEL.data());
 	glUniformMatrix4fv(glGetUniformLocation(pid, "VIEW"), 1, GL_FALSE, VIEW.data());
 	glUniformMatrix4fv(glGetUniformLocation(pid, "PROJ"), 1, GL_FALSE, PROJ.data());
-	water.draw();
+//	water.draw();
 	glUseProgram(0);
 	
 }

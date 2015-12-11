@@ -29,47 +29,47 @@ public:
 		///--- Vertex coordinates
 		{
 			float vpoint[] = {
-				-195.0f, 195.0f, -195.0f,
-				-195.0f, -195.0f, -195.0f,
-				195.0f, -195.0f, -195.0f,
-				195.0f, -195.0f, -195.0f,
-				195.0f, 195.0f, -195.0f,
-				-195.0f, 195.0f, -195.0f,
+				-300.0f, 300.0f, -300.0f,
+				-300.0f, -300.0f, -300.0f,
+				300.0f, -300.0f, -300.0f,
+				300.0f, -300.0f, -300.0f,
+				300.0f, 300.0f, -300.0f,
+				-300.0f, 300.0f, -300.0f,
 
-				-195.0f, -195.0f, 195.0f,
-				-195.0f, -195.0f, -195.0f,
-				-195.0f, 195.0f, -195.0f,
-				-195.0f, 195.0f, -195.0f,
-				-195.0f, 195.0f, 195.0f,
-				-195.0f, -195.0f, 195.0f,
+				-300.0f, -300.0f, 300.0f,
+				-300.0f, -300.0f, -300.0f,
+				-300.0f, 300.0f, -300.0f,
+				-300.0f, 300.0f, -300.0f,
+				-300.0f, 300.0f, 300.0f,
+				-300.0f, -300.0f, 300.0f,
 
-				195.0f, -195.0f, -195.0f,
-				195.0f, -195.0f, 195.0f,
-				195.0f, 195.0f, 195.0f,
-				195.0f, 195.0f, 195.0f,
-				195.0f, 195.0f, -195.0f,
-				195.0f, -195.0f, -195.0f,
+				300.0f, -300.0f, -300.0f,
+				300.0f, -300.0f, 300.0f,
+				300.0f, 300.0f, 300.0f,
+				300.0f, 300.0f, 300.0f,
+				300.0f, 300.0f, -300.0f,
+				300.0f, -300.0f, -300.0f,
 
-				-195.0f, -195.0f, 195.0f,
-				-195.0f, 195.0f, 195.0f,
-				195.0f, 195.0f, 195.0f,
-				195.0f, 195.0f, 195.0f,
-				195.0f, -195.0f, 195.0f,
-				-195.0f, -195.0f, 195.0f,
+				-300.0f, -300.0f, 300.0f,
+				-300.0f, 300.0f, 300.0f,
+				300.0f, 300.0f, 300.0f,
+				300.0f, 300.0f, 300.0f,
+				300.0f, -300.0f, 300.0f,
+				-300.0f, -300.0f, 300.0f,
 
-				-195.0f, 195.0f, -195.0f,
-				195.0f, 195.0f, -195.0f,
-				195.0f, 195.0f, 195.0f,
-				195.0f, 195.0f, 195.0f,
-				-195.0f, 195.0f, 195.0f,
-				-195.0f, 195.0f, -195.0f,
+				-300.0f, 300.0f, -300.0f,
+				300.0f, 300.0f, -300.0f,
+				300.0f, 300.0f, 300.0f,
+				300.0f, 300.0f, 300.0f,
+				-300.0f, 300.0f, 300.0f,
+				-300.0f, 300.0f, -300.0f,
 
-				-195.0f, -195.0f, -195.0f,
-				-195.0f, -195.0f, 195.0f,
-				195.0f, -195.0f, -195.0f,
-				195.0f, -195.0f, -195.0f,
-				-195.0f, -195.0f, 195.0f,
-				195.0f, -195.0f, 195.0f
+				-300.0f, -300.0f, -300.0f,
+				-300.0f, -300.0f, 300.0f,
+				300.0f, -300.0f, -300.0f,
+				300.0f, -300.0f, -300.0f,
+				-300.0f, -300.0f, 300.0f,
+				300.0f, -300.0f, 300.0f
 			};
 			///--- Buffer
 			glGenBuffers(1, &_vbo_vpoint);
@@ -86,10 +86,37 @@ public:
 
 		///--- Texture coordinates
 		{
-			const GLfloat vtexcoord[] = { /*V1*/ 0.0f, 0.0f,
-				/*V2*/ 1.0f, 0.0f,
-				/*V3*/ 0.0f, 1.0f,
-				/*V4*/ 1.0f, 1.0f };
+			const GLfloat vtexcoord[] = { 
+				// front
+				-0.5, 0.5, 1.0,
+				0.5, 0.5, 1.0,
+				0.5, -0.5, 1.0,
+				-0.5, -0.5, 1.0,
+				// top
+				-0.5, 1.0, -1.0,
+				0.0, 1.0, -1.0,
+				0.0, 1.0, 1.0,
+				-0.5, 1.0, 1.0,
+				// back
+				0.5, -0.5, -1.0,
+				1.0, -0.5, -1.0,
+				1.0, 0.5, -1.0,
+				0.5, 0.5, -1.0,
+				// bottom
+				-0.5, 0.5, 1.0,
+				0.0, 0.5, 1.0,
+				0.0, 0.5, -1.0,
+				-0.5, -1.0, -1.0,
+				// left
+				-1.0, 0.5, -1.0,
+				-0.5, 0.5, 1.0,
+				-0.5, -0.5, 1.0,
+				-1.0, -1.0, -1.0,
+				// right
+				0.0, 0.5, 1.0,
+				0.5, 0.5, -1.0,
+				0.5, -0.5, -1.0,
+				0.0, -0.5, 1.0, };
 
 			///--- Buffer
 			glGenBuffers(1, &_vbo_vtexcoord);
@@ -105,13 +132,14 @@ public:
 		///--- Load texture
 		glGenTextures(1, &_tex);
 		glBindTexture(GL_TEXTURE_2D, _tex);
-		glfwLoadTexture2D("skybox.tga", 0);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glUniform1i(glGetUniformLocation(_pid, "skyTex"), 7 /*GL_TEXTURE7*/);
+		glfwLoadTexture2D("_mesh/skybox.tga", 0);
+		
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glUniform1i(glGetUniformLocation(_pid, "skyTex"), 0 /*GL_TEXTURE0*/);
 
 
 		///--- to avoid the current object being polluted
@@ -128,8 +156,8 @@ public:
 
 
 		///--- Bind textures
-		glBindTexture(GL_TEXTURE_CUBE_MAP, _tex);
-		glActiveTexture(GL_TEXTURE7);
+		glBindTexture(GL_TEXTURE_2D, _tex);
+		glActiveTexture(GL_TEXTURE0);
 
 		//	glUniform1f(glGetUniformLocation(_pid, "time"), glfwGetTime()); //will be used for water ripples.
 

@@ -266,13 +266,6 @@ void init(int width, int height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glUniform1i(glGetUniformLocation(_pid, "tex_water"), 5 /*GL_TEXTURE5*/);
 
-	glGenTextures(1, &_tex_sky);
-	glBindTexture(GL_TEXTURE_2D, _tex_sky);
-	glfwLoadTexture2D("_mesh/skybox.tga", 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glUniform1i(glGetUniformLocation(_pid, "skytex"), 6 /*GL_TEXTURE7*/);
-
 	RGBImage Noise = BuildNoiseImage(FBM_SIZE, FBM_SIZE); //lets give this some different dimensions
 
 	//vertex buffer for heightmap texture
@@ -301,6 +294,13 @@ void init(int width, int height)
 		Noise.cols(), 0, GL_RGB, GL_FLOAT,
 		Noise.data());
 
+	glGenTextures(1, &_tex_sky);
+	glBindTexture(GL_TEXTURE_2D, _tex_sky);
+	glfwLoadTexture2D("_mesh/skybox.tga", 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glUniform1i(glGetUniformLocation(_pid, "skytex"), 7 /*GL_TEXTURE7*/);
+	
 	///--- to avoid the current object being polluted
 	glBindVertexArray(0);
 	glUseProgram(0);
@@ -335,6 +335,9 @@ void draw()
 	glBindTexture(GL_TEXTURE_2D, _tex_water);
 	glActiveTexture(GL_TEXTURE6);
 	glBindTexture(GL_TEXTURE_2D, _tex_heightMap);
+
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_2D, _tex_sky);
 
 	glUniform1f(glGetUniformLocation(_pid, "time"), glfwGetTime()); 
 
