@@ -79,8 +79,8 @@ public:
 			///--- Attribute
 			vpoint_id = glGetAttribLocation(_pid, "vpointSky");
 			glEnableVertexAttribArray(vpoint_id);
-		//	glBindBuffer(GL_ARRAY_BUFFER, _vbo_vpoint);
-		//	glVertexAttribPointer(vpoint_id, 3, GL_FLOAT, DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
+			//	glBindBuffer(GL_ARRAY_BUFFER, _vbo_vpoint);
+			//	glVertexAttribPointer(vpoint_id, 3, GL_FLOAT, DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 		}
 
@@ -112,7 +112,7 @@ public:
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glUniform1i(glGetUniformLocation(_pid, "skyTex"), 7 /*GL_TEXTURE7*/);
-	
+
 
 		///--- to avoid the current object being polluted
 		glBindVertexArray(0);
@@ -121,7 +121,7 @@ public:
 
 	void draw()
 	{
-//		glDepthMask(GL_FALSE);
+		//		glDepthMask(GL_FALSE);
 		glUseProgram(_pid);
 		glBindVertexArray(_vaoSky);
 		check_error_gl();
@@ -131,16 +131,16 @@ public:
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _tex);
 		glActiveTexture(GL_TEXTURE7);
 
-	//	glUniform1f(glGetUniformLocation(_pid, "time"), glfwGetTime()); //will be used for water ripples.
-		
-		
+		//	glUniform1f(glGetUniformLocation(_pid, "time"), glfwGetTime()); //will be used for water ripples.
+
+
 		glDrawArrays(GL_TRIANGLES, 0, 36);
-	//	glDepthMask(GL_TRUE);
+		//	glDepthMask(GL_TRUE);
 		GLint vpoint_id = glGetAttribLocation(_pid, "_vbo_vpoint");
 		if (vpoint_id >= 0)
 			glDisableVertexAttribArray(vpoint_id);
 		glDisableVertexAttribArray(vpoint_id);
-		
+
 		glUseProgram(0);
 		glBindVertexArray(0);
 	}

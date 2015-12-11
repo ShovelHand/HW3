@@ -22,6 +22,7 @@ public:
 	GLuint _tex_sand; ///< Texture ID
 	GLuint _tex_snow; ///< Texture ID
 	GLuint _tex_water; ///< Texture ID
+	GLuint _tex_sky; ///< Texture ID
 	GLuint _tex_uvDebug; ///< Texture ID
 	GLuint _tex_heightMap;
 	GLuint _vnormal;   ///< memory buffer
@@ -216,7 +217,7 @@ void init(int width, int height)
 	GLuint vpoint_id = glGetAttribLocation(_pid, "vpoint");
 	glEnableVertexAttribArray(vpoint_id);
 	glVertexAttribPointer(vpoint_id, 3, GL_FLOAT, DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
-
+	
 	///--- Load texture grass
 	glGenTextures(1, &_tex_grass);
 	glBindTexture(GL_TEXTURE_2D, _tex_grass);
@@ -265,6 +266,13 @@ void init(int width, int height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glUniform1i(glGetUniformLocation(_pid, "tex_water"), 5 /*GL_TEXTURE5*/);
 
+	glGenTextures(1, &_tex_sky);
+	glBindTexture(GL_TEXTURE_2D, _tex_sky);
+	glfwLoadTexture2D("_mesh/skybox.tga", 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glUniform1i(glGetUniformLocation(_pid, "skytex"), 6 /*GL_TEXTURE7*/);
+
 	RGBImage Noise = BuildNoiseImage(FBM_SIZE, FBM_SIZE); //lets give this some different dimensions
 
 	//vertex buffer for heightmap texture
@@ -292,7 +300,7 @@ void init(int width, int height)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, Noise.rows(),
 		Noise.cols(), 0, GL_RGB, GL_FLOAT,
 		Noise.data());
-	
+
 	///--- to avoid the current object being polluted
 	glBindVertexArray(0);
 	glUseProgram(0);

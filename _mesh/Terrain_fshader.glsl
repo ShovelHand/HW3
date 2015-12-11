@@ -18,6 +18,7 @@ uniform sampler2D tex_sand;
 uniform sampler2D tex_snow;
 uniform sampler2D tex_water;
 uniform sampler2D tex_height;
+uniform sampler2D tex_sky;
 
 void main() {
 //get normal for fragment 

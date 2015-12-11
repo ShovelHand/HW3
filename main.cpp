@@ -17,6 +17,8 @@ Skybox skybox;
 Water water;
 typedef Eigen::Transform<float, 3, Eigen::Affine> Transform;
 
+bool keypress = false;
+int lastkey = -1;
 //mouse panning helpers
 bool rotating = false;
 bool scaling = false;
@@ -158,12 +160,16 @@ void display(){
 	glUniformMatrix4fv(glGetUniformLocation(pid, "PROJ"), 1, GL_FALSE, PROJ.data());
 	water.draw();
 	glUseProgram(0);
+	
 }
 
 void cleanup(){}
 
-void keyboard(int key, int action){
-	if (action != GLFW_PRESS && action != GLFW_KEY_REPEAT) return; ///< only act on PRESS	
+void keyboard(int key, int action)
+{
+	if (action == GLFW_RELEASE)
+		return; ///< only act on PRESS
+
 	float delta = 0.02;  ///the step amount for wasd
 	vec3 xaxis = dirVec.normalized().cross(vec3(0, 1, 0));
 	switch (key){
@@ -195,14 +201,14 @@ void keyboard(int key, int action){
 
 int main(int, char**){
 	glfwInitWindowSize(window_width, window_height);
-	glfwCreateWindow();
+	glfwCreateWindow();	glfwEnable(GLFW_KEY_REPEAT);
 	glfwDisplayFunc(display);
 	
 	glfwSetMouseButtonCallback(selection_button);
 	glfwSetMousePosCallback(mousemove);
 	glfwSetKeyCallback(keyboard);
 	init();
-	keyboard(GLFW_KEY_KP_1, 0);
+//	keyboard(GLFW_KEY_KP_1, 0);
 	glfwMainLoop();
 	cleanup();
 	return EXIT_SUCCESS;
