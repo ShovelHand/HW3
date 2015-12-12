@@ -55,7 +55,7 @@ RGBImage BuildNoiseImage(int width, int height)
 	RGBImage base(width, height);
 	RGBImage result(width, height);
 	//set vertex heights using Perlin noise
-	int period = 96;
+	int period = 80;
 	float frequency = 1.0f / period;
 	std::srand(19);
 	vec3 randGradientVec;
@@ -111,7 +111,7 @@ RGBImage BuildNoiseImage(int width, int height)
 	for (int i = 0; i < base.rows(); i++)
 		for (int j = 0; j < base.cols(); j++)
 		{
-			float value = fBm(vec3(j, i,0), 0.4, 2, 16,0.7f);
+			float value = fBm(vec3(j, i,0), 0.8, 2, 16,0.5f);
 			result(j, i) = vec3(value, value, value);
 		}
 	

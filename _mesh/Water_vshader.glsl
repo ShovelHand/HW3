@@ -19,10 +19,10 @@ float tex_at(vec2 uv){ return texture(tex_height,uv).r; }
 
 void main() {          
     fpoint = vpoint + .5; ///< For coloring Debug [0,1]^3 
- //   fnormal_cam = inverse( transpose( mat3(VIEW * MODEL) )) * vnormal;
+    fnormal_cam = inverse( transpose( mat3(VIEW * MODEL) )) * vnormal;
 	uv = vec2(fpoint.x, fpoint.z + time/4); //make water texture appear to ripple by sliding (and repeating) on z axis 
 //	float vheight =  tex_at(uv);
-	gl_Position = PROJ * VIEW *  vec4(vpoint.x, -0.5, vpoint.z, 1.0);
+	gl_Position = PROJ * VIEW *  vec4(vpoint.x, -0.75, vpoint.z, 1.0);
 	
    
 }
