@@ -7,7 +7,7 @@
 using namespace EigenVisualizer;
 
 typedef Eigen::Transform<float, 3, Eigen::Affine> Transform;
-#define MAX_OCTAVES 16
+#define MAX_OCTAVES 1000
 #define FBM_SIZE 512
 
 class TerrainMesh{
@@ -55,7 +55,7 @@ RGBImage BuildNoiseImage(int width, int height)
 	RGBImage base(width, height);
 	RGBImage result(width, height);
 	//set vertex heights using Perlin noise
-	int period = 80;
+	int period = 120;
 	float frequency = 1.0f / period;
 	std::srand(19);
 	vec3 randGradientVec;
@@ -111,7 +111,7 @@ RGBImage BuildNoiseImage(int width, int height)
 	for (int i = 0; i < base.rows(); i++)
 		for (int j = 0; j < base.cols(); j++)
 		{
-			float value = fBm(vec3(j, i,0), 0.8, 2, 16,0.5f);
+			float value = fBm(vec3(j, i,0), 0.3, 2, 90,0.7f);
 			result(j, i) = vec3(value, value, value);
 		}
 	
@@ -127,7 +127,7 @@ float fBm(vec3 point, float H, int lacunarity, int octaves, float offset)
 
 	if (first)
 	{
-		frequency = 0.2;
+		frequency = 1;
 
 		for (i = 0; i< MAX_OCTAVES; i++) 
 		{ /* compute weight for each frequency */

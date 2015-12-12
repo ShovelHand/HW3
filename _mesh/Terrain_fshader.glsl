@@ -38,6 +38,7 @@ void main() {
 	vec3 L = vec3(500,10000,500); //light position
 	float intensity = 15;
 	float light = max(dot(surfaceNorm, normalize(L))*intensity, 0.0);
+	vec3 H = normalize(L + fnormal_cam);
 
 	//calculate texture blend based on height and slope
 	vec3 grass = texture(tex_grass, uv).rgb;
@@ -47,16 +48,18 @@ void main() {
 	vec3 snow = texture(tex_snow, uv).rgb;
 
 	//texture blending
-	if(vheight < -0.3)
+	if(vheight < 0.5)
 		color = mix(sand, grass, vheight*1.5);
-	else if(vheight >=-0.3 && vheight < 2)
+	else if(vheight >=0.5 && vheight < 2)
 		color = mix(grass, rock, vheight);
 	else if(vheight >= 2)
+	{
 		color = mix(rock,snow,vheight/3.0);
-		if (light < 0.3) light = 0.3; 
-				color *= light;		 
-		
+		color += 10*max(0, pow(dot(surfaceNorm,H),1.25));
+	}
 
+	if (light < 0.3) light = 0.3; 
+			color *= light;		 
 //	color = texture(tex_height, TexCoord0.st).rgb;
 	
 }

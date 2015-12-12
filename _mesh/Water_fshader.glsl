@@ -29,7 +29,6 @@ void main() {
 	float intensity = 15;
 	float light = max(dot(surfaceNorm, normalize(L))*intensity, 0.0);
 
-//	color.rgb = texture(tex_water, uv).rgb;
 	color.rgb = vec3(0.25,0.25,0.5);
 	color += vec3(1,1,1)*light;
 	color += 1000*max(0, dot(surfaceNorm,H));
