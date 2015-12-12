@@ -55,7 +55,7 @@ RGBImage BuildNoiseImage(int width, int height)
 	RGBImage base(width, height);
 	RGBImage result(width, height);
 	//set vertex heights using Perlin noise
-	int period = 64;
+	int period = 96;
 	float frequency = 1.0f / period;
 	std::srand(19);
 	vec3 randGradientVec;
@@ -111,16 +111,16 @@ RGBImage BuildNoiseImage(int width, int height)
 	for (int i = 0; i < base.rows(); i++)
 		for (int j = 0; j < base.cols(); j++)
 		{
-			float value = fBm(vec3(j, i,0), 0.4, 2, 6)*1.5;
+			float value = fBm(vec3(j, i,0), 0.4, 2, 16,0.7f);
 			result(j, i) = vec3(value, value, value);
 		}
 	
 	return result;
 }
 
-float fBm(vec3 point, float H, int lacunarity, int octaves)
+float fBm(vec3 point, float H, int lacunarity, int octaves, float offset)
 {
-	float value, frequency, remainder; 
+	float value, frequency, remainder, signal, weight; 
 	int i;
 	static bool first = true;
 	static float exp_array[MAX_OCTAVES]; 
@@ -137,12 +137,15 @@ float fBm(vec3 point, float H, int lacunarity, int octaves)
 
 		first = false;
 	}
-	value = 0.0;
-
+	1 - abs(value = noiseArray[int(point.x() + offset) % FBM_SIZE][int(point.y() + offset) % FBM_SIZE] * exp_array[0]);
+	weight = value;
 	/* inner loop of spectral construction */ 
 	for (i = 0; i < octaves; i++)
 	{
-		value += noiseArray[int(point.x()) % FBM_SIZE][int(point.y()) % FBM_SIZE] * exp_array[i];
+		if (weight > 1.0) weight = 1.0;
+		signal = 1 - abs(noiseArray[int(point.x() + offset) % FBM_SIZE][int(point.y() + offset) % FBM_SIZE] * exp_array[i]);
+		value += weight * signal;
+		weight *= signal;
 		point.x() *= lacunarity; point.y() *= lacunarity;// point.z() *= lacunarity;
 	} /* for */
 

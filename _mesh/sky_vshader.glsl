@@ -1,7 +1,7 @@
 #version 330 core
-in vec3 vpointSky;
+layout (location = 0) in vec3 vpointSky;
 in vec2 vtexcoordSky;
-out vec2 uv;
+out vec3 texCoords;
 
 //uniform mat4 M;
 ///--- Uploaded by Eigen in C++
@@ -14,5 +14,5 @@ uniform mat4 PROJ;
 void main() {
  //   gl_Position = M * vec4(vpointSky, 1.0);
 	gl_Position =PROJ * VIEW * vec4(vpointSky.x, vpointSky.y, vpointSky.z, 1.0);
-	uv = vtexcoordSky;
+	texCoords = vpointSky;
 }

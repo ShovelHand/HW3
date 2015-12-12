@@ -86,7 +86,7 @@ public:
 
 		///--- Texture coordinates
 		{
-			const GLfloat vtexcoord[] = { 
+			const GLfloat vtexcoord[] = {
 				// front
 				-0.5, 0.5, 1.0,
 				0.5, 0.5, 1.0,
@@ -128,23 +128,34 @@ public:
 			glEnableVertexAttribArray(vtexcoord_id);
 			glVertexAttribPointer(vtexcoord_id, 2, GL_FLOAT, DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
 		}
-
+		
 		///--- Load texture
 		glGenTextures(1, &_tex);
-		glBindTexture(GL_TEXTURE_2D, _tex);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, _tex);
 		glfwLoadTexture2D("_mesh/skybox.tga", 0);
-		
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glGenerateMipmap(GL_TEXTURE_2D);
-		glUniform1i(glGetUniformLocation(_pid, "skyTex"), 0 /*GL_TEXTURE0*/);
+
+		for (GLuint i = 0; i < 6; i++)
+		{
+
+			glTexImage2D(
+				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0,
+				GL_RGB, 100, 100, 0, GL_RGB, GL_UNSIGNED_BYTE, "_mesh/skybox.tga"
+				);
+		}
+
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+		glUniform1i(glGetUniformLocation(_pid, "tex_sky"), 0 /*GL_TEXTURE0*/);
 
 
 		///--- to avoid the current object being polluted
 		glBindVertexArray(0);
 		glUseProgram(0);
+		check_error_gl();
 	}
 
 	void draw()
@@ -152,11 +163,10 @@ public:
 		//		glDepthMask(GL_FALSE);
 		glUseProgram(_pid);
 		glBindVertexArray(_vaoSky);
-		check_error_gl();
 
 
 		///--- Bind textures
-		glBindTexture(GL_TEXTURE_2D, _tex);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, _tex);
 		glActiveTexture(GL_TEXTURE0);
 
 		//	glUniform1f(glGetUniformLocation(_pid, "time"), glfwGetTime()); //will be used for water ripples.
