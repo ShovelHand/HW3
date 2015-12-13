@@ -22,7 +22,7 @@ void main() {
     fnormal_cam = inverse( transpose( mat3(VIEW * MODEL) )) * vnormal;
 	uv = vec2(fpoint.x, fpoint.z + time/6); //make water texture appear to ripple by sliding (and repeating) on z axis 
 //	float vheight =  tex_at(uv);
-	gl_Position = PROJ * VIEW *  vec4(vpoint.x, -3.5, vpoint.z, 1.0);
+	gl_Position = PROJ * VIEW *  vec4(vpoint.x, -1, vpoint.z, 1.0);
 	
    
 }

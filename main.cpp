@@ -3,13 +3,15 @@
 #include "_mesh/TerrainMesh.h"
 #include "_mesh/Skybox.h"
 #include "_mesh/Water.h"
-
+#include "FrameBuffer.h"
 #include "OpenGLImage/EigenVisualizer.h"
 
 using namespace EigenVisualizer;
 
 int window_width = 1280;
 int window_height = 640;
+
+FrameBuffer fb(window_width, window_height);
 
 Mesh mesh;
 TerrainMesh terrain;
@@ -119,9 +121,11 @@ void init(){
 
 	glClearColor(0.5, 0.5, 0.5, /*solid*/1.0);
 	glEnable(GL_DEPTH_TEST);
-	//    mesh.init();
+
+	//Set up the framebuffer object to be used as the texture
+	GLuint fb_tex = fb.init();
 	terrain.init(500, 500);
-	skybox.init(700, 700);
+	//	skybox.init(700, 700);	
 	water.init(500, 500);
 
 	//setup viewing matrices;
@@ -135,13 +139,17 @@ void display(){
 	glViewport(0, 0, window_width, window_height);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	GLuint pid;
-	
+
+	vec3 cam_pos_mirror = eye;
+	cam_pos_mirror(2) = -eye(2);
+	mat4 view_mirror = Eigen::lookAt(cam_pos_mirror, dirVec, vec3(0, 1, 0));
+	//	fb.bind();
 	pid = skybox.getProgramID();
 	glUseProgram(pid);
 	glUniformMatrix4fv(glGetUniformLocation(pid, "MODEL"), 1, GL_FALSE, MODEL.data());
 	glUniformMatrix4fv(glGetUniformLocation(pid, "VIEW"), 1, GL_FALSE, VIEW.data());
 	glUniformMatrix4fv(glGetUniformLocation(pid, "PROJ"), 1, GL_FALSE, PROJ.data());
-//	skybox.draw();
+	//	skybox.draw();
 	glUseProgram(0);
 
 	pid = terrain.getProgramID();
@@ -150,6 +158,7 @@ void display(){
 	glUniformMatrix4fv(glGetUniformLocation(pid, "VIEW"), 1, GL_FALSE, VIEW.data());
 	glUniformMatrix4fv(glGetUniformLocation(pid, "PROJ"), 1, GL_FALSE, PROJ.data());
 	terrain.draw();
+	//	fb.unbind();
 	glUseProgram(0);
 
 	//viewing matrices	
@@ -160,7 +169,7 @@ void display(){
 	glUniformMatrix4fv(glGetUniformLocation(pid, "PROJ"), 1, GL_FALSE, PROJ.data());
 	water.draw();
 	glUseProgram(0);
-	
+
 }
 
 void cleanup(){}
@@ -175,7 +184,7 @@ void keyboard(int key, int action)
 	switch (key){
 	case '0': break;
 	case 'w': case 'W':
-		eye  += dirVec*delta;
+		eye += dirVec*delta;
 		dirVec += dirVec*delta;
 		break;
 	case 's': case 'S':
@@ -194,7 +203,7 @@ void keyboard(int key, int action)
 		printf("eye = %f, %f, %f dirVec = %f, %f, %f \n", eye.x(), eye.y(), eye.z(), dirVec.x(), dirVec.y(), dirVec.z());
 		break;
 	default: break;
-	
+
 	}
 	VIEW = Eigen::lookAt(eye, dirVec, vec3(0, 1, 0));
 }
@@ -203,12 +212,12 @@ int main(int, char**){
 	glfwInitWindowSize(window_width, window_height);
 	glfwCreateWindow();	glfwEnable(GLFW_KEY_REPEAT);
 	glfwDisplayFunc(display);
-	
+
 	glfwSetMouseButtonCallback(selection_button);
 	glfwSetMousePosCallback(mousemove);
 	glfwSetKeyCallback(keyboard);
 	init();
-//	keyboard(GLFW_KEY_KP_1, 0);
+	//	keyboard(GLFW_KEY_KP_1, 0);
 	glfwMainLoop();
 	cleanup();
 	return EXIT_SUCCESS;

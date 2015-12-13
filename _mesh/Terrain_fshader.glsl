@@ -48,17 +48,21 @@ void main() {
 	vec3 snow = texture(tex_snow, uv).rgb;
 
 	//texture blending
-	if(vheight < 0.5)
-		color = mix(sand, grass, vheight*1.5);
-	else if(vheight >=0.5 && vheight < 2)
-		color = mix(grass, rock, vheight);
-	else if(vheight >= 2)
+	if(vheight < -0.5)
+		color = texture(tex_sand, uv).rgb;
+	else if(vheight < 1.0 && vheight >= -0.5)
+		color = mix(sand, grass, vheight+ 0.5);
+	else if(vheight >=1.0)
 	{
-		color = mix(rock,snow,vheight/3.0);
-		color += 10*max(0, pow(dot(surfaceNorm,H),1.25));
+		color = mix(grass, rock, max(0,vheight/4));
+		if(vheight >= 4 && dy_p + dy_m > 9)
+		{
+			color = mix(rock,snow,vheight/4.0);
+			color += 10*max(0, pow(dot(surfaceNorm,H),1.25)); //specular shading on the snow.
+		}
 	}
 
-	if (light < 0.3) light = 0.3; 
+	if (light < 0.5) light = 0.5; 
 			color *= light;		 
 //	color = texture(tex_height, TexCoord0.st).rgb;
 	
