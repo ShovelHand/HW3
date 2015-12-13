@@ -9,6 +9,7 @@ public:
 	GLuint _vbo_vpointWater; ///< memory buffer
 
 	GLuint _tex_water; ///< Texture ID
+	GLuint _tex_water1; ///< Texture ID for cool lapping effect
 
 	std::vector<vec3> vertices;
 	std::vector<vec3> triangle_vec; //defines the order in which vertices are used in the triangle strips
@@ -81,6 +82,15 @@ public:
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glUniform1i(glGetUniformLocation(_pid, "tex_water"), 5 /*GL_TEXTURE5*/);
 
+		///--- Load texture water
+		glGenTextures(1, &_tex_water1);
+		glBindTexture(GL_TEXTURE_2D, _tex_water1);
+		glfwLoadTexture2D("_mesh/water.tga", 0);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glUniform1i(glGetUniformLocation(_pid, "tex_water1"), 8 /*GL_TEXTURE8*/);
+
 		///--- to avoid the current object being polluted
 		glBindVertexArray(0);
 		glUseProgram(0);
@@ -95,6 +105,9 @@ public:
 
 		glBindTexture(GL_TEXTURE_2D, _tex_water);
 		glActiveTexture(GL_TEXTURE5);
+
+		glBindTexture(GL_TEXTURE_2D, _tex_water1);
+		glActiveTexture(GL_TEXTURE8);
 
 		glUniform1f(glGetUniformLocation(_pid, "time"), glfwGetTime()); //will be used for water ripples.
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA);

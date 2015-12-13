@@ -125,13 +125,13 @@ void init(){
 	//Set up the framebuffer object to be used as the texture
 	GLuint fb_tex = fb.init();
 	terrain.init(500, 500);
-	//	skybox.init(700, 700);	
+	skybox.init(700, 700);	
 	water.init(500, 500);
 
 	//setup viewing matrices;
 	MODEL = mat4::Identity();
 	VIEW = Eigen::lookAt(eye, dirVec, vec3(0, 1, 0));
-	PROJ = Eigen::perspective(45.0f, window_width / (float)window_height, 0.1f, 600.0f);
+	PROJ = Eigen::perspective(45.0f, window_width / (float)window_height, 0.1f, 1100.0f);
 }
 
 void display(){
@@ -149,7 +149,7 @@ void display(){
 	glUniformMatrix4fv(glGetUniformLocation(pid, "MODEL"), 1, GL_FALSE, MODEL.data());
 	glUniformMatrix4fv(glGetUniformLocation(pid, "VIEW"), 1, GL_FALSE, VIEW.data());
 	glUniformMatrix4fv(glGetUniformLocation(pid, "PROJ"), 1, GL_FALSE, PROJ.data());
-	//	skybox.draw();
+	skybox.draw();
 	glUseProgram(0);
 
 	pid = terrain.getProgramID();

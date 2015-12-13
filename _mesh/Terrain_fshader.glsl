@@ -54,7 +54,7 @@ void main() {
 		color = mix(sand, grass, vheight+ 0.5);
 	else if(vheight >=1.0)
 	{
-		color = mix(grass, rock, max(0,vheight/4));
+		color = mix(grass, rock, max(0,vheight/4 - 0.25));
 		if(vheight >= 4 && dy_p + dy_m > 9)
 		{
 			color = mix(rock,snow,vheight/4.0);

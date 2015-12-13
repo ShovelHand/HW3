@@ -22,6 +22,7 @@ public:
 	GLuint _tex_sand; ///< Texture ID
 	GLuint _tex_snow; ///< Texture ID
 	GLuint _tex_water; ///< Texture ID
+	GLuint _tex_water1; ///< Texture ID
 	GLuint _tex_sky; ///< Texture ID
 	GLuint _tex_uvDebug; ///< Texture ID
 	GLuint _tex_heightMap;
@@ -303,6 +304,15 @@ void init(int width, int height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glUniform1i(glGetUniformLocation(_pid, "skytex"), 7 /*GL_TEXTURE7*/);
+
+	///--- Load texture water
+	glGenTextures(1, &_tex_water1);
+	glBindTexture(GL_TEXTURE_2D, _tex_water1);
+	glfwLoadTexture2D("_mesh/water.tga", 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glUniform1i(glGetUniformLocation(_pid, "tex_water1"), 8 /*GL_TEXTURE8*/);
 	
 	///--- to avoid the current object being polluted
 	glBindVertexArray(0);
@@ -338,9 +348,10 @@ void draw()
 	glBindTexture(GL_TEXTURE_2D, _tex_water);
 	glActiveTexture(GL_TEXTURE6);
 	glBindTexture(GL_TEXTURE_2D, _tex_heightMap);
-
 	glActiveTexture(GL_TEXTURE7);
 	glBindTexture(GL_TEXTURE_2D, _tex_sky);
+	glBindTexture(GL_TEXTURE_2D, _tex_water1);
+	glActiveTexture(GL_TEXTURE8);
 
 	glUniform1f(glGetUniformLocation(_pid, "time"), glfwGetTime()); 
 

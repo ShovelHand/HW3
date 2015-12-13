@@ -6,6 +6,7 @@ in vec3 vnormal;
 out vec3 fpoint; ///< for debug
 out vec3 fnormal_cam;
 out vec2 uv;
+out vec2 uv1;
 
 ///--- Uploaded by Eigen in C++
 uniform mat4 CAMERA;
@@ -20,8 +21,8 @@ float tex_at(vec2 uv){ return texture(tex_height,uv).r; }
 void main() {          
     fpoint = vpoint + .5; ///< For coloring Debug [0,1]^3 
     fnormal_cam = inverse( transpose( mat3(VIEW * MODEL) )) * vnormal;
-	uv = vec2(fpoint.x, fpoint.z + time/6); //make water texture appear to ripple by sliding (and repeating) on z axis 
-//	float vheight =  tex_at(uv);
+	uv = vec2(fpoint.x+ time/3, fpoint.z + time/6); //make water texture appear to ripple by sliding (and repeating) on z axis 
+	uv1 = vec2(fpoint.x + time/6, fpoint.z + time/3 ); //make water texture appear to ripple by sliding (and repeating) on z axis 
 	gl_Position = PROJ * VIEW *  vec4(vpoint.x, -1, vpoint.z, 1.0);
 	
    
