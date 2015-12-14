@@ -24,7 +24,7 @@ void main() {
 	
 	vec3 dx = normalize(vec3(1.0,dx_p - dx_m,0.0));
 	vec3 dy = normalize(vec3(1.0,dy_p - dy_m,0.0));
-	vec3 surfaceNorm = vec3(cross(dx*2*max(abs(cos(time)),0.5),dy*2*max(abs(sin(time)),0.5)));
+	vec3 surfaceNorm = vec3(cross(dx*2*max(abs(cos(time/4.0)),0.5),dy*2*max(abs(sin(time/4.0)),0.5)));
 
 	 dx_p = textureOffset(tex_water1, uv1, ivec2(+1,0))[0];
 	 dx_m = textureOffset(tex_water1, uv1, ivec2(-1,0))[0];
@@ -33,7 +33,7 @@ void main() {
 	
 	 dx = normalize(vec3(1.0,dx_p - dx_m,0.0));
 	 dy = normalize(vec3(1.0,dy_p - dy_m,0.0));
-	 vec3 surfaceNorm1 = vec3(cross(dx*2*max(abs(sin(time)),0.5),dy*2*max(abs(cos(time)),0.5)));
+	 vec3 surfaceNorm1 = vec3(cross(dx*2*max(abs(sin(time/4.0)),0.5),dy*2*max(abs(cos(time/4.0)),0.5)));
 	
 	vec3 L = vec3(500,10000,500); //light position
 	vec3 H = normalize(L + fnormal_cam);
@@ -42,7 +42,7 @@ void main() {
 
 	color.rgb = vec3(0.125,0.125,0.25);
 	color.rgb += vec3(1,1,1)*light;
-	color.rgb += 1000*max(0, pow(dot(surfaceNorm,H),1.5));
-	color.rgb += 1000*max(0, pow(dot(surfaceNorm1,H),1.5));
+	color.rgb += 1000*max(0, pow(dot(surfaceNorm,H),1.7));
+	color.rgb += 1000*max(0, pow(dot(surfaceNorm1,H),1.7));
 	color.a = 0.9;
 }
