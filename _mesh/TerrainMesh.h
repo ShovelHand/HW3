@@ -105,14 +105,14 @@ RGBImage BuildNoiseImage(int width, int height)
 			float noise = mix(st, uv, fy);
 
 				//	result(i,j) = vec3(noise, noise, noise);
-			noiseArray[i][j] = noise*2;	
+			noiseArray[i][j] = noise;	
 		}
 	}
 
 	for (int i = 0; i < base.rows(); i++)
 		for (int j = 0; j < base.cols(); j++)
 		{
-			float value = fBm(vec3(j, i,0), 0.3, 2, 90,0.7f);
+			float value = fBm(vec3(j, i,0), 0.1, 2, 60,0.6f);
 			result(j, i) = vec3(value, value, value);
 		}
 	

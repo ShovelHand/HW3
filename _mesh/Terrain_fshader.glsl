@@ -52,15 +52,24 @@ void main() {
 		color = texture(tex_sand, uv).rgb;
 	else if(vheight < 1.0 && vheight >= -0.5)
 		color = mix(sand, grass, vheight+ 0.5);
-	else if(vheight >=1.0)
+	else if(vheight >=1.0 && vheight < 4)
 	{
 		color = mix(grass, rock, max(0,vheight/4 - 0.25));
-		if(vheight >= 4 && dy_p + dy_m > 9)
-		{
-			color = mix(rock,snow,vheight/4.0);
-			color += 10*max(0, pow(dot(surfaceNorm,H),1.25)); //specular shading on the snow.
-		}
+		if(dy_p > 3.5 && vheight < 4) color = texture(tex_rock,uv).rgb;
+		
 	}
+	else if(vheight >= 4)
+		{
+			if(dy_p > 5 && vheight <5)
+			{
+				color = mix(grass, rock, max(0,vheight/4 - 0.25));
+			}
+			else
+			{
+				color = mix(rock,snow,vheight/4.0);
+				color += 10*max(0, pow(dot(surfaceNorm,H),1.25)); //specular shading on the snow.
+			}
+		}
 
 	if (light < 0.5) light = 0.5; 
 			color *= light;		 

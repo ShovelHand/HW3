@@ -133,13 +133,14 @@ public:
 		glGenTextures(1, &_tex);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _tex);
 		glfwLoadTexture2D("_mesh/skybox.tga", 0);
+		GLvoid* data = &_tex;
 
 		for (GLuint i = 0; i < 6; i++)
 		{
-
+			
 			glTexImage2D(
 				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0,
-				GL_RGB, 100, 100, 0, GL_RGB, GL_UNSIGNED_BYTE, "_mesh/skybox.tga"
+				GL_RGB, 100, 100, 0, GL_RGB, GL_UNSIGNED_BYTE, data
 				);
 		}
 

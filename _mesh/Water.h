@@ -7,12 +7,14 @@ public:
 	GLuint _vao; ///< vertex array object
 	GLuint _pid; ///< GLSL shader program ID 
 	GLuint _vbo_vpointWater; ///< memory buffer
+	GLuint _vbo_vtexcoord; ///< memory buffer
 
 	GLuint _tex_water; ///< Texture ID
 	GLuint _tex_water1; ///< Texture ID for cool lapping effect
 
 	std::vector<vec3> vertices;
 	std::vector<vec3> triangle_vec; //defines the order in which vertices are used in the triangle strips
+	std::vector<vec2> vtexcoord;  //texture coords for height map. Covers whole mesh
 
 	void MakeVertices(int width, int height)
 	{
@@ -43,6 +45,8 @@ public:
 				triangle_vec.push_back(vertices[bottomleft]);
 			}
 		}
+		for (std::vector<vec3>::iterator itr = triangle_vec.begin(); itr != triangle_vec.end(); ++itr)
+			vtexcoord.push_back(vec2((*itr).x() / float(width /8.0f), (*itr).z() / float(height/8.0f)));
 	}
 
 	GLuint getProgramID(){
@@ -72,6 +76,16 @@ public:
 		GLuint vpoint_id = glGetAttribLocation(_pid, "vpoint");
 		glEnableVertexAttribArray(vpoint_id);
 		glVertexAttribPointer(vpoint_id, 3, GL_FLOAT, DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
+
+		///--- Buffer
+		glGenBuffers(1, &_vbo_vtexcoord);
+		glBindBuffer(GL_ARRAY_BUFFER, _vbo_vtexcoord);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vec2)*vtexcoord.size(), &vtexcoord[0], GL_STATIC_DRAW);
+
+		///--- Attribute
+		GLuint vtexcoord_id = glGetAttribLocation(_pid, "TexCoord");
+		glEnableVertexAttribArray(vtexcoord_id);
+		glVertexAttribPointer(vtexcoord_id, 2, GL_FLOAT, DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
 
 		///--- Load texture water
 		glGenTextures(1, &_tex_water);

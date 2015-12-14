@@ -2,6 +2,7 @@
 uniform float time;
 in vec3 vpoint;
 in vec3 vnormal;
+in vec2 TexCoord;
 
 out vec3 fpoint; ///< for debug
 out vec3 fnormal_cam;
@@ -21,8 +22,8 @@ float tex_at(vec2 uv){ return texture(tex_height,uv).r; }
 void main() {          
     fpoint = vpoint + .5; ///< For coloring Debug [0,1]^3 
     fnormal_cam = inverse( transpose( mat3(VIEW * MODEL) )) * vnormal;
-	uv = vec2(fpoint.x+ time/3, fpoint.z + time/6); //make water texture appear to ripple by sliding (and repeating) on z axis 
-	uv1 = vec2(fpoint.x + time/6, fpoint.z + time/3 ); //make water texture appear to ripple by sliding (and repeating) on z axis 
+	uv = vec2(TexCoord.x + time/96, TexCoord.y + time/48); //make water texture appear to ripple by sliding (and repeating) on z axis 
+	uv1 = vec2(TexCoord.x + time/48, TexCoord.y + time/96 ); //make water texture appear to ripple by sliding (and repeating) on z axis 
 	gl_Position = PROJ * VIEW *  vec4(vpoint.x, -1, vpoint.z, 1.0);
 	
    
